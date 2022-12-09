@@ -1,0 +1,22 @@
+    
+Cd(__DIR__);;
+#include "Here"
+
+
+
+U0 LaunchApp()
+{
+  U8 *here=Here;
+  CTask *user1;
+  user1=User;
+  XTalk(user1,MStrPrint("Cd(\"%s\");\n",here));
+  XTalk(user1,"DocClear;\n");
+  XTalk(user1,"#include \"Here\";\n");
+  XTalk(user1,"#include \"Scripts/Common\";\n");
+  XTalk(user1,"I64 animation_menu_sec=0;\n");
+  XTalk(user1,"#include \"Scripts/BugGameSongs\";\n");
+  XTalk(user1,"#include \"Pages/StartPage\";\n");
+  Exit;
+}
+
+LaunchApp;

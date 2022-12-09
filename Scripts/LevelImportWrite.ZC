@@ -1,0 +1,6 @@
+/*
+RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesScripts/slot_%d",LOADED_MAP_ID),
+	  load_map_txt);//Write Saves
+RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesNames/slot_%d",LOADED_MAP_ID),
+	  MStrPrint("U8 *slot_map_name=\"%s\";\n",LOADED_MAP_NAME));//Write Name
+*/

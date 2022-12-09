@@ -1,0 +1,575 @@
+
+$SP,"<1>",BI=1$
+
+
+$SP,"<2>",BI=2$ $SP,"<3>",BI=3$
+
+
+$SP,"<4>",BI=4$     $SP,"<5>",BI=5$    
+
+
+
+
+
+
+U8 *enemy_sprite_species1[2]={$IB,"<2>",BI=2$,$IB,"<4>",BI=4$},
+   *enemy_sprite_species2[2]={$IB,"<3>",BI=3$,$IB,"<5>",BI=5$};
+
+
+I64 display_length=160,
+    display_height=(MAX_MODE_NUM+5)*8;
+
+
+class MEGrid
+{
+  I64 x1,
+      y1,
+      x2,
+      y2;
+} MEGrid[GRID_NUM];
+
+
+U0 DrawMEGrid(CTask *,CDC *dc)
+{
+  I64 i;
+//Draw MEGrid
+  for (i=0;i<GRID_NUM;i++) {
+    dc->color=LTGRAY;
+    GrLine(dc,MEGrid[i].x1+cam_x,MEGrid[i].y1+cam_y,MEGrid[i].x2+cam_x,MEGrid[i].y1+cam_y);
+    GrLine(dc,MEGrid[i].x1+cam_x,MEGrid[i].y1+cam_y,MEGrid[i].x1+cam_x,MEGrid[i].y2+cam_y);
+    GrLine(dc,MEGrid[i].x2+cam_x,MEGrid[i].y1+cam_y,MEGrid[i].x2+cam_x,MEGrid[i].y2+cam_y);
+    GrLine(dc,MEGrid[i].x1+cam_x,MEGrid[i].y2+cam_y,MEGrid[i].x2+cam_x,MEGrid[i].y2+cam_y);   
+  }
+}
+
+U0 DrawMEPlayer(CTask *,CDC *dc)
+{
+//Draw Player
+  if (select_option==1) {
+    dc->color=CYAN;
+    GrRect(dc,set_player_x-PLAYER_WIDTH/2+cam_x,set_player_y-PLAYER_HEIGHT/2+cam_y,PLAYER_WIDTH,PLAYER_HEIGHT);
+  }
+  Sprite3(dc,set_player_x+cam_x,set_player_y+cam_y,0,$IB,"<1>",BI=1$);
+}
+
+U0 DrawMEEnemy(CTask *,CDC *dc)
+{
+  I64 i;
+//Draw Enemy
+  if (select_option==2) {
+    dc->color=LTPURPLE;
+    GrRect(dc,set_enemy_x[me_enemy_id]-3+cam_x,set_enemy_y[me_enemy_id]-3+cam_y,6,6);
+  }
+  for (i=0;i<ENEMY_NUM;i++) {
+    if (select_option==2) {//Draw Circles
+      Highlight(me_enemy_id==i,LTPURPLE,BLACK,dc);
+      GrPrint(dc,set_enemy_x[i]+cam_x-10,set_enemy_y[i]+cam_y-10,"%d",i);
+      if (me_enemy_id==i) { //follow range
+        dc->color=GREEN;
+        GrCircle(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,set_enemy_type_follow_range[set_enemy_type[i]]*NODE_SIZE/2);
+      }
+      if (me_enemy_id==i) { //chase range
+        dc->color=LTGREEN;
+        GrCircle(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,set_enemy_type_chase_range[set_enemy_type[i]]*NODE_SIZE/2);
+      }
+      if (me_enemy_id==i) { //unchase range
+        dc->color=LTRED;
+        GrCircle(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,set_enemy_type_unchase_range[set_enemy_type[i]]*NODE_SIZE/2);
+      }
+      dc->color=RED;//Shooting range
+      if (me_enemy_id==i) { //follow range
+        GrCircle(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,set_enemy_type_shoot_at_player_range[set_enemy_type[i]]*NODE_SIZE/2);
+      }
+      Highlight(set_map_background!=1,set_enemy_type_bullet_color[set_enemy_type[i]],palette_dark_arr[set_enemy_type_bullet_color[set_enemy_type[i]]],dc);
+      if (me_enemy_id==i) { //bullet range
+        GrCircle(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,set_enemy_type_bullet_range[set_enemy_type[i]]*NODE_SIZE/2);
+      }
+    }
+    Highlight(set_map_background!=1,set_enemy_type_color[set_enemy_type[i]],palette_dark_arr[set_enemy_type_color[set_enemy_type[i]]],dc);
+    Sprite3(dc,set_enemy_x[i]+cam_x,set_enemy_y[i]+cam_y,0,enemy_sprite_species1[set_enemy_type_species[set_enemy_type[i]]]);
+  }
+}
+
+U0 DrawMEGroundEdge(CTask *,CDC *dc)
+{
+  I64 i;
+  for (i=0;i<GROUND_NUM;i++) {
+  //draw ground edge
+  //Set x1
+    Highlight(i==me_ground_id && set_x1,LTPURPLE,BLACK,dc);
+    if (set_ground_is_ghost[i]) {
+      GrCircle(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y,7);
+    }
+    if (i!=me_ground_id) {
+      GrCircle(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y,2);
+    } else {
+      GrCircle(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y,5);
+    }
+  //Set x2
+    Highlight(i==me_ground_id && set_x2,LTPURPLE,BLACK,dc);
+    if (set_ground_is_ghost[i]) { //Ghost Grnd
+      GrCircle(dc,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y,7);
+    }
+    if (i!=me_ground_id) {
+      GrCircle(dc,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y,2);
+    } else {
+      GrCircle(dc,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y,5);
+    }
+  //Set x3
+    if (set_ground_type[i]==3) { //TriFill
+      Highlight(i==me_ground_id && set_x3,LTPURPLE,BLACK,dc);
+      if (set_ground_is_ghost[i]) { //Ghost Grnd
+        GrCircle(dc,set_ground_x3[i]+cam_x,set_ground_y3[i]+cam_y,7);
+      }
+      if (i!=me_ground_id) {//not selected
+        GrCircle(dc,set_ground_x3[i]+cam_x,set_ground_y3[i]+cam_y,2);
+      } else {//selected
+        GrCircle(dc,set_ground_x3[i]+cam_x,set_ground_y3[i]+cam_y,5);
+      }
+    }
+  //write ground id
+    if (set_ground_x1[i]!=0 && set_ground_y1[i]!=0) {
+      GrPrint(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+8+cam_y,"%d",i);
+      //GrPrint(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+16+cam_y,"%d",set_ground_type[i]);
+    }
+  }  
+}
+
+U0 DrawMETriFills(CTask *task,CDC *dc)
+{
+  I64 i,c;
+  for (i=0;i<GROUND_NUM;i++) {
+    if (set_ground_type[i]==3 &&
+        (0<set_ground_x1[i]+cam_x<GR_WIDTH || 
+         0<set_ground_x2[i]+cam_x<GR_WIDTH ||
+         0<set_ground_x3[i]+cam_x<GR_WIDTH) &&
+        (0<set_ground_y1[i]+cam_y<GR_HEIGHT || 
+         0<set_ground_y2[i]+cam_y<GR_HEIGHT ||
+         0<set_ground_y3[i]+cam_y<GR_HEIGHT)
+      ) {
+      if (set_map_background!=1) {
+        c=set_ground_color[i];
+      } else {
+        c=palette_dark_arr[set_ground_color[i]]+WHITE<<16+ROPF_DITHER;
+      }
+      DrawTriFill(task,dc,c
+		,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y
+		,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y
+		,set_ground_x3[i]+cam_x,set_ground_y3[i]+cam_y
+      );
+    }
+  }
+}
+
+U0 DrawMEGround(CTask *,CDC *dc)
+{
+  I64 i;
+  for (i=0;i<GROUND_NUM;i++) {
+    if (set_ground_type[i]==0) {
+      Highlight(set_map_background!=1,set_ground_color[i],palette_dark_arr[set_ground_color[i]]/*+WHITE<<16+ROPF_DITHER*/,dc);
+      GrLine(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y);
+    } else if (set_ground_type[i]) {
+
+    }
+  }
+}
+
+U0 DrawMEGroundFloodfill(CTask *,CDC *dc)
+{
+  I64 i;
+  for (i=0;i<GROUND_NUM;i++) {
+    if (set_ground_type[i]==1) {
+      Highlight(set_map_background!=1,set_ground_color[i],palette_dark_arr[set_ground_color[i]]+WHITE<<16+ROPF_DITHER,dc);
+      GrFloodFill(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y);
+      GrFloodFill(dc,set_ground_x2[i]+cam_x,set_ground_y2[i]+cam_y);
+    }
+  }
+}
+
+U0 DrawMEGroundText(CTask *,CDC *dc)
+{
+  I64 i;
+  for (i=0;i<GROUND_NUM;i++) {
+    if (set_ground_type[i]==2) {
+      Highlight(set_map_background!=1,set_ground_color[i],palette_dark_arr[set_ground_color[i]],dc);
+      GrPrint(dc,set_ground_x1[i]+cam_x,set_ground_y1[i]+cam_y,"%s",set_ground_text[i]);
+    }
+  }
+}
+
+
+I64 *enemy_type_i64_attr_string_int_arr[ENEMY_I64_ATTRIBUTES_NUM]=
+{
+   set_enemy_type_species,
+   set_enemy_type_follow_range,
+   set_enemy_type_unchase_range,
+   set_enemy_type_chase_range,
+   -1,
+   set_enemy_type_speed_multiplier,
+   set_enemy_type_health,
+   set_enemy_type_shoot_at_player_range,
+   set_enemy_type_aim_rand,
+   set_enemy_type_bullet_cooldown,
+   set_enemy_type_bullet_fire_cooldown,
+   set_enemy_type_bullet_fire_at_once,
+   set_enemy_type_bullet_length,
+   set_enemy_type_bullet_damage,
+   set_enemy_type_bullet_speed_multiplier,
+   set_enemy_type_bullet_range,
+   -1,
+   set_enemy_type_bullet_graphics_type,
+   set_enemy_type_snd_dur,
+   set_enemy_type_snd_pitch,
+   set_enemy_type_snd_rand,
+   set_enemy_type_death_snd_dur,
+   set_enemy_type_death_snd_pitch,
+   set_enemy_type_death_snd_rand,
+   set_enemy_type_tbt_rare,
+   set_enemy_type_tbt_length
+};
+
+U8 *ground_type_str[GROUND_TYPE_NUM]={"Normal","Flood Fill","Text","TriFill"},
+   *gamemode_str[GAMEMODE_NUM]={"Kill all Enemies","Reach FinishBox"},
+   *enemy_type_i64_attr_string_arr[ENEMY_I64_ATTRIBUTES_NUM]={
+      "Species",
+      "Follow Range",
+      "Unchase Range",
+      "Chase Range",
+      "Color",
+      "Speed *",
+      "Health",
+      "Shoot Range",
+      "Aim Rand",
+      "Bullet Gap",
+      "Firing Delay",
+      "Bullets/fire",
+      "Bullet Length",
+      "Bullet Dmg",
+      "Bullet Speed*",
+      "Bullet Range",
+      "Bullet Color",
+      "Bullet Looks",
+      "Sound Duration",
+      "Sound Pitch",
+      "Sound Rand",
+      "MortSnd Dur",
+      "MortSnd Pitch",
+      "MortSnd Rand",
+      "TBT Rare",
+      "TBT Length"
+   };
+   //*enemy_type_f64_attr_string_arr[ENEMY_F64_ATTRIBUTES_NUM]={"Speed","Bullet Speed"},
+
+U0 DrawGUIDisplay(CTask *task,CDC *dc)
+{
+  I64 i,q=8*24,enemy_type_y=8*(ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM+4);
+  //Bottom Left
+  if (open_help) {
+    dc->color=BLACK;
+    GrRect(dc,0,GR_HEIGHT-q-4-16,display_length*2,q);
+    dc->color=LTCYAN;
+    GrPrint(dc,0,GR_HEIGHT-q-4-16,"
+[WASD]        Movement
+[Left Click]  Placement
+[Right Click] X1/X2/X3 (Ground Only)
+[TAB]	      Change Options
+['z'/'x']     -/+ ID
+[CTRL_C]      Copy Attributes
+[CTRL_V]      Paste Attributes
+[CTRL_F]      Search Object ID
+[':']/['\"']  -/+ Sticky Level
+[SHIFT_F]     Go to Object via ID
+[LEFT/RIGHT]  -/+ Attribute
+[UP/DOWN]     -/+ Attribute Options
+[SHIFT_M]     ON/OFF WinBorder
+[CTRL_S]      Save
+[ESC]	      Save & Exit
+[SHIFT_ESC]   Abort
+
+cam.x/y:    %1.0f,%1.0f
+cursor.x/y: %1.0f,%1.0f
+
+
+Press '?' to Close Help
+",cam_x,cam_y,mouse.pos.x-cam_x,mouse.pos.y-6-cam_y);
+  } else {
+    dc->color=BLACK;
+    GrRect(dc,0,GR_HEIGHT-40,display_length*2,40);
+    dc->color=LTCYAN;
+    GrPrint(dc,0,GR_HEIGHT-32-4,"Press '?' to Open Help");
+  }
+  //Bottom Right
+  dc->color=BLACK;
+  GrRect(dc,GR_WIDTH-8*14,GR_HEIGHT-40,8*14,8*2+4);
+  dc->color=WHITE;
+  GrPrint(dc,GR_WIDTH-8*14,GR_HEIGHT-32-4," Sticky: %d",sticky_level);
+  //Draw GUI display
+  switch (select_option) {
+    case 0:
+      dc->color=BLACK;
+      GrRect(dc,0,0,display_length+248,8*10);
+      dc->color=LTGREEN;
+      GrPrint(dc,display_length+4,8*4+8*select_attribute,"¯");
+      dc->color=LTCYAN;
+      GrPrint(dc,display_length+16,8-2,	  "x1:%1.0f y1:%1.0f",set_ground_x1[me_ground_id],set_ground_y1[me_ground_id]);
+      GrPrint(dc,display_length+16,16-2,	  "x2:%1.0f y2:%1.0f",set_ground_x2[me_ground_id],set_ground_y2[me_ground_id]);
+      if (set_ground_type[me_ground_id]==3) {
+        GrPrint(dc,display_length+16,24-2,	  "x3:%1.0f y3:%1.0f",set_ground_x3[me_ground_id],set_ground_y3[me_ground_id]);
+      }
+      dc->color=LTGRAY;
+      GrRect(dc,display_length+8*31,0,248,8*10);
+      dc->color=WHITE;
+//Ground Clipboard
+      GrPrint(dc,display_length+8*32,2,"Clipboard");
+      GrPrint(dc,display_length+8*32,8*2, "x1:%1.0f y1:%1.0f",clipboard_ground_x1,clipboard_ground_y1);
+      GrPrint(dc,display_length+8*32,8*3,"x2:%1.0f y2:%1.0f",clipboard_ground_x2,clipboard_ground_y2);
+      GrPrint(dc,display_length+8*32,8*4,"x3:%1.0f y3:%1.0f",clipboard_ground_x3,clipboard_ground_y3);
+      GrPrint(dc,display_length+8*32,8*5+4,"<%s>",GetBoolString(clipboard_ground_is_ghost));
+      GrPrint(dc,display_length+8*32,8*6+4,"< >");
+      GrPrint(dc,display_length+8*32,8*7+4,"<%s>",ground_type_str[clipboard_ground_type]);
+//Ground Real
+      GrPrint(dc,display_length+16,8*4, "IsGhost:      <%s>",GetBoolString(set_ground_is_ghost[me_ground_id]));
+      GrPrint(dc,display_length+16,8*5, "Color:        < >");
+      if (set_ground_is_ghost[me_ground_id]) {
+        GrPrint(dc,display_length+16,8*6, "Type:	      <%s>",ground_type_str[set_ground_type[me_ground_id]]);
+      }
+      if (set_ground_type[me_ground_id]==2 && !typing) {
+        dc->color=LTCYAN;
+        GrPrint(dc,display_length+16,8*6+2,"
+[ENTER] Edit text
+['F']   See text");
+      } else if (set_ground_type[me_ground_id]==1) {
+        Highlight(set_map_background==1,LTCYAN,LTRED,dc);
+        GrPrint(dc,display_length+16,8*6+2,"
+! Causes Lag !");
+      }
+      dc->color=WHITE;
+      GrRect(dc,display_length+88+48+1+8*16,8*6+1+4,6,6);  //Clipboard
+      GrRect(dc,display_length+88+48+1,8*5+1,6,6);	//Real
+//Clipboard
+      Highlight(set_map_background!=1,clipboard_ground_color,palette_dark_arr[clipboard_ground_color],dc);
+      GrRect(dc,display_length+88+48+2+8*16,8*6+2+4,4,4);
+//Real
+      Highlight(set_map_background!=1,set_ground_color[me_ground_id],palette_dark_arr[set_ground_color[me_ground_id]],dc);
+      GrRect(dc,display_length+88+48+2,8*5+2,4,4);
+      break;
+    case 2:
+      dc->color=BLACK;
+      GrRect(dc,0,0,display_length+200,8*5);
+      dc->color=LTGREEN;
+      GrPrint(dc,display_length+4,8+8*select_attribute,"¯");
+      GrPrint(dc,display_length+200-8*3,8+8*select_attribute,"®");
+      dc->color=WHITE;
+      GrPrint(dc,display_length+16,8,  "Enemy Type:   <%d>",set_enemy_type[me_enemy_id]);
+      GrPrint(dc,display_length+16,16, "X:            <%1.0f>",set_enemy_x[me_enemy_id]);
+      GrPrint(dc,display_length+16,24, "Y:            <%1.0f>",set_enemy_y[me_enemy_id]);
+  //Clipboard
+      dc->color=LTGRAY;
+      GrRect(dc,display_length+8*25,0,200,8*5);
+      dc->color=WHITE;
+      GrPrint(dc,display_length+8*26,0,"Clipboard");
+      GrPrint(dc,display_length+8*26,8, "<%d>",clipboard_enemy_type);
+      GrPrint(dc,display_length+8*26,16,"<%1.0f>",clipboard_enemy_x);
+      GrPrint(dc,display_length+8*26,24,"<%1.0f>",clipboard_enemy_y);
+      break;
+    case 3:
+  //Draw Enemy Type
+      dc->color=LTGRAY;
+      GrRect(dc,0,0,GR_WIDTH,GR_HEIGHT);
+      dc->color=BLACK;
+      GrRect(dc,0,0,display_length+200,8*(ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM+ENEMY_BOOL_ATTRIBUTES_NUM));
+      dc->color=LTGREEN;
+      GrPrint(dc,display_length+4,8+8*select_attribute,"¯");
+      GrPrint(dc,display_length+200-8*3,8+8*select_attribute,"®");
+	//super set enemy type F64
+      Highlight(select_attribute==0,LTGREEN,WHITE,dc);
+      GrPrint(dc,display_length+16,8, "Speed:        <%1.1f>",set_enemy_type_speed[me_enemy_type_id]);
+      Highlight(select_attribute==1,LTGREEN,WHITE,dc);
+      GrPrint(dc,display_length+16,16,"Bullet Speed: <%1.1f>",set_enemy_type_bullet_speed[me_enemy_type_id]);
+	//super set enemy type I64
+      for (i=0;i<ENEMY_I64_ATTRIBUTES_NUM;i++) {
+        Highlight((select_attribute==i+2),LTGREEN,WHITE,dc);
+	GrPrint(dc,display_length+16,24+i*8,"%s:",enemy_type_i64_attr_string_arr[i]);
+        if (enemy_type_i64_attr_string_int_arr[i]!=-1/*i!=4 && i!=15*/) {
+	  GrPrint(dc,display_length+16+8*14,24+i*8,"<%d>",enemy_type_i64_attr_string_int_arr[i][me_enemy_type_id]);
+        } else {
+	  GrPrint(dc,display_length+16+8*14,24+i*8,"< >");	
+        }
+      }
+	//super set enemy type bool
+      Highlight(select_attribute==ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM-2,LTGREEN,WHITE,dc);
+      GrPrint(dc,display_length+16,8+(ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM-2)*8,"Tyrant Immune:<%d>",set_enemy_type_tyrant_immune[me_enemy_type_id]);
+//--------clipboard---------
+      dc->color=BLACK;
+      GrPrint(dc,display_length+8*26,0,"Clipboard");
+      GrPrint(dc,display_length+8*26,8, "<%1.1f>",clipboard_enemy_type_speed);
+      GrPrint(dc,display_length+8*26,16,"<%1.1f>",clipboard_enemy_type_bullet_speed);
+	//super set enemy type I64
+      GrPrint(dc,display_length+8*26,24,"<%d>",clipboard_enemy_type_species);
+      GrPrint(dc,display_length+8*26,32,"<%d>",clipboard_enemy_type_follow_range);
+      GrPrint(dc,display_length+8*26,40,"<%d>",clipboard_enemy_type_unchase_range);
+      GrPrint(dc,display_length+8*26,48,"<%d>",clipboard_enemy_type_chase_range);
+      GrPrint(dc,display_length+8*26,56,"< >");
+      GrPrint(dc,display_length+8*26,64,"<%d>",clipboard_enemy_type_speed_multiplier);
+      GrPrint(dc,display_length+8*26,72,"<%d>",clipboard_enemy_type_health);
+      GrPrint(dc,display_length+8*26,80,"<%d>",clipboard_enemy_type_shoot_at_player_range);
+      GrPrint(dc,display_length+8*26,88,"<%d>",clipboard_enemy_type_aim_rand);
+      GrPrint(dc,display_length+8*26,96,"<%d>",clipboard_enemy_type_bullet_cooldown);
+      GrPrint(dc,display_length+8*26,104,"<%d>",clipboard_enemy_type_bullet_fire_cooldown);
+      GrPrint(dc,display_length+8*26,112,"<%d>",clipboard_enemy_type_bullet_fire_at_once);
+      GrPrint(dc,display_length+8*26,120,"<%d>",clipboard_enemy_type_bullet_length);
+      GrPrint(dc,display_length+8*26,128,"<%d>",clipboard_enemy_type_bullet_damage);
+      GrPrint(dc,display_length+8*26,136,"<%d>",clipboard_enemy_type_bullet_speed_multiplier);
+      GrPrint(dc,display_length+8*26,144,"<%d>",clipboard_enemy_type_bullet_range);
+      GrPrint(dc,display_length+8*26,152,"< >");
+      GrPrint(dc,display_length+8*26,160,"<%d>",clipboard_enemy_type_bullet_graphics_type);
+      GrPrint(dc,display_length+8*26,168,"<%d>",clipboard_enemy_type_snd_dur);
+      GrPrint(dc,display_length+8*26,176,"<%d>",clipboard_enemy_type_snd_pitch);
+      GrPrint(dc,display_length+8*26,184,"<%d>",clipboard_enemy_type_snd_rand);
+      GrPrint(dc,display_length+8*26,192,"<%d>",clipboard_enemy_type_death_snd_dur);
+      GrPrint(dc,display_length+8*26,200,"<%d>",clipboard_enemy_type_death_snd_pitch);
+      GrPrint(dc,display_length+8*26,208,"<%d>",clipboard_enemy_type_death_snd_rand);	
+      GrPrint(dc,display_length+8*26,216,"<%d>",clipboard_enemy_type_tbt_rare);
+      GrPrint(dc,display_length+8*26,224,"<%d>",clipboard_enemy_type_tbt_length);
+        //set enemy_type Bool
+      GrPrint(dc,display_length+8*26,232,"<%d>",clipboard_enemy_type_tyrant_immune);
+    //color enemy box
+      dc->color=WHITE;
+      //clipboard
+      GrRect(dc,display_length+8*27+1,56+1,6,6);
+      GrRect(dc,display_length+8*27+1,152+1,6,6);
+      //real
+      GrRect(dc,display_length+88+48+1,56+1,6,6);
+      GrRect(dc,display_length+88+48+1,152+1,6,6);
+    //color rects
+      //clipboard
+      Highlight(set_map_background!=1,clipboard_enemy_type_color,palette_dark_arr[clipboard_enemy_type_color],dc);
+      GrRect(dc,display_length+8*27+2,2+56,4,4);
+      //real
+      Highlight(set_map_background!=1,set_enemy_type_color[me_enemy_type_id],palette_dark_arr[set_enemy_type_color[me_enemy_type_id]],dc);
+      GrRect(dc,display_length+88+48+2,2+56,4,4);
+    //color bullet
+      //clipboard
+      Highlight(set_map_background!=1,clipboard_enemy_type_bullet_color,palette_dark_arr[clipboard_enemy_type_bullet_color],dc);
+      GrRect(dc,display_length+8*27+2,2+152,4,4);
+      //real
+      Highlight(set_map_background!=1,set_enemy_type_bullet_color[me_enemy_type_id],palette_dark_arr[set_enemy_type_bullet_color[me_enemy_type_id]],dc);
+      GrRect(dc,display_length+88+48+2,2+152,4,4);
+    //Draw Enemy Follow Range & Bullet
+      //dc->color=LimitValue(15-set_enemy_type_color[me_enemy_type_id],0,16); //invert color
+      //GrRect(dc,8,enemy_type_y-10,16,16);
+      //GrRect(dc,animated_enemy_x-8,enemy_type_y+8*5-10,16,16);//follow range
+      Highlight(set_map_background!=1,set_enemy_type_color[me_enemy_type_id],palette_dark_arr[set_enemy_type_color[me_enemy_type_id]],dc);
+      Sprite3(dc,16,enemy_type_y,0,enemy_sprite_species1[set_enemy_type_species[me_enemy_type_id]]); //enemy_bullet range
+      Sprite3(dc,animated_enemy_x,enemy_type_y+8*5,0,enemy_sprite_species1[set_enemy_type_species[me_enemy_type_id]]);//enemy follow range
+      dc->color=RED;//shoot range
+      GrLine(dc,16,enemy_type_y+10,16+set_enemy_type_shoot_at_player_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+10);
+      Sprite3(dc,16+set_enemy_type_shoot_at_player_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+10,0,$IB,"<1>",BI=1$);
+      dc->color=GREEN; //follow range
+      GrLine(dc,16,enemy_type_y+8*5,16+set_enemy_type_follow_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*5);
+      Sprite3(dc,16+set_enemy_type_follow_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*5,0,$IB,"<1>",BI=1$);
+      dc->color=LTRED;//unchase range
+      GrLine(dc,16,enemy_type_y+8*7,16+set_enemy_type_unchase_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*7);
+      Sprite3(dc,16+set_enemy_type_unchase_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*7,0,$IB,"<6>",BI=6$);
+      dc->color=LTGREEN; //chase range
+      GrLine(dc,16,enemy_type_y+8*9,16+set_enemy_type_chase_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*9);
+      Sprite3(dc,16+set_enemy_type_chase_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y+8*9,0,$IB,"<7>",BI=7$);
+    //Draw bullet
+      Highlight(set_map_background!=1,set_enemy_type_bullet_color[me_enemy_type_id],palette_dark_arr[set_enemy_type_bullet_color[me_enemy_type_id]],dc);
+      for (i=0;i<current_dbullet_id;i++) {
+	F64 db_x=DBullet[i].x,db_y=enemy_type_y;
+	switch (set_enemy_type_bullet_graphics_type[me_enemy_type_id]) {
+    	  case 0:
+            GrCircle(dc,db_x,db_y,2);
+            break;
+	  case 1:
+      	    GrCircle(dc,db_x,db_y,1);
+      	    break;
+    	  case 2:
+            GrCircle(dc,db_x,db_y,1);
+      	    GrCircle(dc,db_x,db_y,2);
+            break;
+    	  case 3:
+      	    GrCircle(dc,db_x,db_y,RandNum(0,3));
+            break;
+    	  case 4:
+	    I64 j;
+	    for (j=RandNum(0,3);j>0;j--) {
+      	      GrCircle(dc,db_x,db_y,j);
+            }
+            break;
+        }	
+      } //bullet_range
+      GrLine(dc,16,enemy_type_y,16+set_enemy_type_bullet_range[me_enemy_type_id]*NODE_SIZE/2,enemy_type_y);
+      dc->color=PURPLE;
+      GrPrint(dc,0,88,"
+['l'] Play Sound 
+['L'] Play MortSnd
+['m'] Stop Sound");
+  }
+  dc->color=DKGRAY;
+  GrRect(dc,0,0,display_length,display_height);
+  dc->color=WHITE;
+  switch (select_option) {
+    case 0:
+      GrPrint(dc,0,8, "Line ID: %d/%d",me_ground_id,GROUND_NUM-1);
+      GrPrint(dc,0,16,"Set X1,X2,X3: %d,%d,%d",set_x1,set_x2,set_x3);
+      break;
+    case 2:
+      GrPrint(dc,0,8, "Enemy ID: %d/%d",me_enemy_id,ENEMY_NUM-1);
+      break;
+    case 3:
+      GrPrint(dc,0,8, "Enemy Type ID: %d/%d",me_enemy_type_id,ENEMY_TYPE_NUM-1);
+      break;
+    case 4:
+      dc->color=DKGRAY;
+      GrRect(dc,display_length,0,8*10,display_height);
+      dc->color=WHITE;
+      GrPrint(dc,0,8, "Gamemode: <%s>",gamemode_str[set_gamemode]);
+      if (set_gamemode==1) {
+        GrPrint(dc,0,16,"Set X1,X2: %d,%d",set_x1,set_x2);
+	dc->color=BLACK;
+	GrRect(dc,display_length+8*10,0,GR_WIDTH-display_length-8*10,display_height);
+        dc->color=LTCYAN;
+        GrPrint(dc,display_length+8*11,0,"
+[ENTER]: Edit Goal Message");
+        dc->color=WHITE;
+        GrPrint(dc,display_length+8*11,16,"\"%s\"",set_goal_text);
+      }
+      break;
+    case 5:
+      dc->color=BLACK;
+      GrRect(dc,display_length,0,display_length+24,8*5);
+      dc->color=WHITE;
+      GrPrint(dc,display_length+16,8, "BG Type:  <%d>",set_map_background);
+      GrPrint(dc,display_length+16,16,"BG Color: < >",set_custom_map_background_color);
+      if (set_map_background==2) {
+        GrPrint(dc,display_length+16,24,"Inverted: <%s>",GetBoolString(set_is_inverted));
+      }
+      dc->color=LTGREEN;
+      GrPrint(dc,display_length+4,8+8*select_attribute,"¯");
+      dc->color=WHITE;
+      GrRect(dc,display_length+16+8*11+1,16+1,6,6);	//Real
+      dc->color=set_custom_map_background_color;
+      GrRect(dc,display_length+16+8*11+2,16+2,4,4);
+      break;
+  }
+  //select option text
+  for (i=0;i<MAX_MODE_NUM;i++) {
+    Highlight(i==select_option,CYAN,WHITE,dc);
+    GrPrint(dc,0,32+i*8,"%s",mode_str[i]);
+  }
+  //Type mode
+  if (typing) {
+    DrawTypingGUI(task,dc,0,display_height+40-16,"Find ID");
+  }
+}
+        w             ýÿÿÿ   úÿÿÿ            ýÿÿÿ
+          	          þÿÿÿ÷ÿÿÿûÿÿÿóÿÿÿ         þÿÿÿ÷ÿÿÿ   ôÿÿÿ
+           V      
+         ùÿÿÿúÿÿÿúÿÿÿýÿÿÿüÿÿÿÿÿÿÿ    ÿÿÿÿ   úÿÿÿ   ùÿÿÿ   üÿÿÿ   þÿÿÿþÿÿÿ           V      
+         øÿÿÿüÿÿÿûÿÿÿÿÿÿÿüÿÿÿþÿÿÿ   ÿÿÿÿ   ýÿÿÿ	   ûÿÿÿ   ÿÿÿÿ   þÿÿÿþÿÿÿ           Â         üÿÿÿþÿÿÿ   øÿÿÿ   ÿÿÿÿ      üÿÿÿþÿÿÿ      ýÿÿÿ   ÷ÿÿÿ               þÿÿÿúÿÿÿîÿÿÿíÿÿÿëÿÿÿ	   ðÿÿÿ         ûÿÿÿ   ìÿÿÿ   ÿÿÿÿ         ÿÿÿÿýÿÿÿðÿÿÿõÿÿÿòÿÿÿ   øÿÿÿ           Â         üÿÿÿþÿÿÿ   øÿÿÿ   ÿÿÿÿ      üÿÿÿþÿÿÿ      ýÿÿÿ   øÿÿÿ                  úÿÿÿ   ñÿÿÿ       '             ûÿÿÿìÿÿÿïÿÿÿáÿÿÿ   àÿÿÿ          ýÿÿÿðÿÿÿ÷ÿÿÿêÿÿÿ   ìÿÿÿ           w             ýÿÿÿ   úÿÿÿ            ýÿÿÿ
+          	          þÿÿÿ÷ÿÿÿûÿÿÿóÿÿÿ         þÿÿÿ÷ÿÿÿ   ôÿÿÿ
+           w             ýÿÿÿ   úÿÿÿ            ýÿÿÿ
+          	          þÿÿÿ÷ÿÿÿûÿÿÿóÿÿÿ         þÿÿÿ÷ÿÿÿ   ôÿÿÿ
+    

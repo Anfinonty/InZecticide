@@ -1,0 +1,68 @@
+#define GAME_TIPS_NUM	56
+U8 **game_tips[GAME_TIPS_NUM]={
+"You can shoot a web while in mid air",
+"Crawlers cannot Fly",
+"Flies get stunned when hit by your Web head on",
+"You can do an \"air jump\" by shooting a web downwards while in mid-air",
+"Flies are dealt more damage when slammed against a platform",
+"Slamming a Crawlers' underside against a platform deals more damage",
+"A Crawler can't attack while falling",
+"A Crawler can't stand an attack to its underside",
+"Attack a Crawler when you're Rightside Up and it's Upside Down",
+"Attack a Crawler when you're Upside Down and it's Rightside Up",
+"TempleOS is made by Terry A. Davis",
+"Hold Left Click to use your Reaction Time",
+"Right Click to shoot or build a web",
+"You can only shoot or build 1 web at a time",
+"If you are lagging on ZealOS, play this on 640x480 resolution",
+"Crawlers can Crawl on walls",
+"Press the Down Key to Drop down from the ceiling",
+"Hold Uppercut and Press Attack to perform an Uppercut Attack",
+"Hold Up and Press Attack while Upside Down to drag enemies up",
+"Hold Down and Press Attack while Rightside Up to drag enemies down",
+"Hold Right and Spam Left to climb upwards while upside down",
+"Hold Left and Spam Right to climb upwards while upside down",
+"If the game hangs, Press <CTRL_ALT_X> to abort the Game",
+"If you cannot abort the game when it hangs, Reboot the Operating System",
+"Controls, Player Color and Sound Options can be changed in the Settings",
+"You should read the README.DD if you haven't",
+"This game took inspiration from Transformice, a platform game by Atelier801",
+"The enemies use an Optimized A* Pathfinding Algorithm",
+"You can hide beneath a platform or web to be hidden from Flies",
+"You can't hide from Crawlers but you can outrun it",
+"Enemies won't chase you if they haven't seen you",
+"Epstein didn't kill Himself",
+"If you cannot see the enemy, they cannot see you",
+"Crawlers take damage when hit by a web",
+"Shot Webs can't pierce Crawlers",
+"Shot Webs can pierce multiple Flies",
+"Press the Change Web Key to change the type of web building",
+"You can't shoot or build webs near Crawlers",
+"Press the Web Type key to change Web Building Type",
+"Web Building can be used as both Offense and Defense",
+"A web shot at another web strengthens the target web",
+"Shooting a web makes it have low durability but far reach",
+"Building a web is faster and has moderate durability but short reach",
+"Cope",
+"This game's combat is inspired by Sinjid (2013), made by KrinLabs",
+"2GB of Memory is Recommended for Large Maps",
+"Combo and Visual Mechanics are inspired by Burnout, made by Critereon Games",
+"Speed Mechanics are inspired by Need for Speed, made by Blackbox Studios",
+"Bullet Mechanics are inspired by ROTMG, made by Wild Shadow Studios",
+"Dodge, Hit and Slay Enemies to improve your Performance",
+"For Performance Color, BLUE is GOOD; PURPLE is GREAT; LTPURPLE is AWESOME",
+"Performing Different Combo Types earns you more Performance",
+"...",
+"Loading Hint...",
+"You can change your color in the Settings",
+""
+};//-2
+
+U8 *game_tip=game_tips[RandNum(0,GAME_TIPS_NUM-1)];
+
+U0 DrawTips(CTask *,CDC *dc,I64 x2,I64 y,I64 tip_color)
+{
+  I64 x=GR_WIDTH/2-(StrLen(game_tip)*8)/2;
+  dc->color=tip_color;
+  GrPrint(dc,x-x2,y,"%s",game_tip);
+}

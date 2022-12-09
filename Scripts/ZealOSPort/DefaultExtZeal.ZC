@@ -1,0 +1,4 @@
+Bool is_zeal=TRUE;
+#define TOS_EXTENSION		"HC.Z"
+#define ZEAL_EXTENSION		"ZC"
+#define DEFAULT_EXTENSION	ZEAL_EXTENSION

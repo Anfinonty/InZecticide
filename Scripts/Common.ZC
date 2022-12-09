@@ -1,0 +1,137 @@
+//----------------------------
+F64 
+  version=0,
+  CURRENT_VERSION=1.501,
+  DEFAULT_BEST_SCORE=9999;
+
+#define ENEMY_TYPE_NUM	10
+#define MAX_MAP_STR_LEN	16
+#define SAVES			"LevelSaves/Saves"
+#define SAVES_CHALLENGES	"LevelSaves/SavesChallenges"
+#include "Scripts/DefaultExt"
+#define OLD_LENGTH	640
+#define OLD_HEIGHT	480
+#define CENTER_LENGTH	GR_WIDTH/2-OLD_LENGTH/2
+#define CENTER_HEIGHT	GR_HEIGHT/2-OLD_HEIGHT/2
+
+U8 *game_title="";
+
+if (CURRENT_VERSION*1000%1000%100>=51) {
+  game_title=MStrPrint("Insecticide v%1.1f.%1.0f",CURRENT_VERSION-0.1,CURRENT_VERSION*1000%1000%100);
+} else {
+  game_title=MStrPrint("Insecticide v%1.1f.%1.0f",CURRENT_VERSION,CURRENT_VERSION*1000%1000%100);
+}
+//----------------------------
+
+F64 cam_x=0,
+    cam_y=0,
+    cam_move_x=0,
+    cam_move_y=0,
+    background_cam_move_x=0,
+    background_cam_move_y=0;
+
+Bool BigResolution()
+{
+  if (GR_WIDTH>800 || GR_HEIGHT>600) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+U0 CameraInit(F64 x,F64 y)
+{
+  while (x<GR_WIDTH/2) {
+    cam_x++;
+    x++;
+  }
+  while (x>GR_WIDTH/2) {
+    cam_x--;
+    x--;
+  }
+  while (y<GR_HEIGHT/2) {
+    cam_y++;
+    y++;
+  }
+  while (y>GR_HEIGHT/2) {
+    cam_y--;
+    y--;
+  }  
+}
+
+I64 RandNum(I64 min,I64 max)
+{
+  I64 m=0;
+    if (min<0) {
+      m=min-1;
+    }
+    return m+Rand*(max-m+1);
+}
+
+F64 LimitValue(F64 value,F64 min,F64 max)
+{
+  F64 num=value;
+  if (value>=max) {
+    num=min;
+  } else if (value<min) {
+    num=max-1;
+  }
+  return num;
+}
+
+I64 PlaySound(I64 duration,I64 pitch,I64 random)
+{
+  if (duration>1) {
+    Sound(Abs(pitch+RandNum(-random,random)));
+  } else {
+    Sound;
+  } 
+  return duration-1;
+}
+
+//Highlight
+U0 Highlight (Bool condition,I64 highlight_color,I64 default_color,CDC *dc)
+{
+  if (condition) {
+    dc->color=highlight_color;
+  } else {
+    dc->color=default_color;
+  }
+}
+
+U0 DrawProgressBar(CTask *,CDC *dc,I64 x,I64 y,I64 col1,I64 col2,I64 thick,F64 sb,F64 sb_max)
+{
+  dc->color=col1;//Speedbreaker
+  GrRect(dc,x,y,(8*16-8),thick);
+  dc->color=col2;
+  GrRect(dc,x,y,(8*16-8)*(sb/sb_max),thick);
+}
+
+Bool IsOutOfBounds(F64 x,F64 y,I64 r,I64 max_width,I64 max_height)
+{
+  if (x<=r || x>=max_width-r ||  //more than or less than
+      y<=r || y>=max_height-r) { //
+    return TRUE;
+  }
+  return FALSE;
+}
+
+U8 GetBoolString(Bool a)
+{
+  if (a) {
+    return "TRUE";
+  }
+  return "FALSE";
+}
+
+U8 GetBoolString2(Bool a)
+{
+  if (a) {
+    return "ON";
+  }
+  return "OFF";
+}
+
+U0 EndMsg() 
+{
+  "$FG,3$\n\nPress [SHIFT_ESC] and Manually Rejoin$FG$\n\n";
+}

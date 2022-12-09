@@ -1,0 +1,339 @@
+
+Cd(Here);;
+
+#include "Pages/Game/Draw/AniGameMainMenu"
+#include "Scripts/DefineClassValues"
+#include "Scripts/SuperSaves"
+#include "Scripts/JoinMapSelector"
+#include "Scripts/DrawWrongVersion"
+
+I64 select_option=0,
+    option[OPTION_NUM]={GROUND_NUM,
+			ENEMY_NUM,
+			MAP_WIDTH/GRID_SIZE,
+			MAP_HEIGHT/GRID_SIZE},
+    op_min_li[OPTION_NUM]={1,
+			   1,
+			   GR_WIDTH/GRID_SIZE,
+			   GR_HEIGHT/GRID_SIZE},
+    op_max_li[OPTION_NUM]={9001,
+			   101,
+			   GR_WIDTH/GRID_SIZE*20,
+			   GR_HEIGHT/GRID_SIZE*20};
+U8 *dms_str_li[OPTION_NUM]={"Max Grounds",
+			    "Max Enemy Num",
+			    "Max Width",
+			    "Max Height"};
+Bool reset_best_score=FALSE;
+
+U0 DrawMapSettings(CTask *task,CDC *dc)
+{
+  I64 i;
+  dc->color=BLACK;
+  GrRect(dc,0,0,GR_WIDTH,GR_HEIGHT);
+  DrawAnimation(task,dc,CENTER_LENGTH,CENTER_HEIGHT);//RandNum(-1,0),RandNum(-1,0));
+  dc->color=WHITE;
+  GrPrint(dc,0,0,"%s",game_title);
+  GrPrint(dc,0,16,"Map Settings");
+  dc->color=LTCYAN;
+  GrPrint(dc,0,32,
+"
+*[UP]:		 Go up the settings
+*[DOWN]:	 Go down the settings
+*[LEFT]/[RIGHT]: -/+ selected value
+*[ESC]/[ENTER]:	 Save Settings
+*[SHIFT_ESC]:	 Abort
+");
+  dc->color=WHITE;
+  GrPrint(dc,0,88+8*select_option,">");
+  for (i=0;i<OPTION_NUM;i++) {
+    GrPrint(dc,8,88+i*8,"%s:",dms_str_li[i]);
+    if (i>1) { //grid size
+      GrPrint(dc,0,88+i*8,"			<%d>",option[i]*GRID_SIZE);
+    } else {
+      GrPrint(dc,0,88+i*8,"			<%d>",option[i]);
+    }
+  }
+  Highlight(reset_best_score,LTGREEN,DKGRAY,dc);
+  GrPrint(dc,0,88+(OPTION_NUM+2)*8,"[Reset Map Best Score] Press 'r'");
+}
+ 
+F64 AxisOutOfBounds(I64 axis,Bool is_x)
+{
+  if (is_x) {
+    if (axis>option[2]*GRID_SIZE) { //x axis
+      return option[2]*GRID_SIZE-6;
+    }
+  } else {
+    if (axis>option[3]*GRID_SIZE) { //y axis
+      return option[3]*GRID_SIZE-6;
+    }
+  }
+  return axis;
+}
+
+U0 WriteMapNewSettings(U8 *map_name,U8 *extension)
+{
+  I64 o,j,new_max_ground=option[0],new_max_enemy=option[1];
+  F64 num;
+  Bool is_x;
+  DirMake("Tmp");
+  U8 *m=MStrPrint("Tmp/SaveMap.%s",extension);
+  CDoc *doc=DocNew(m);
+//Start
+  DocPrint(doc,"U8 *load_map_txt=\"\n");
+  for (o=0;o<OPTION_NUM;o++) {//beginning
+    if (o>1) {
+      DocPrint(doc,"#define %s	%d\n",define_str_li[o],option[o]*GRID_SIZE);
+    } else {
+      DocPrint(doc,"#define %s	%d\n",define_str_li[o],option[o]);
+    }
+  }
+  for (o=0;o<GROUND_F64_ATTRIBUTES_NUM;o++) { //Write saved grounds
+    if (o%2==0) {
+      is_x=TRUE;
+    } else {
+      is_x=FALSE;
+    }
+    DocPrint(doc,"F64 saved_ground_%s[GROUND_NUM]={%1.0f",int_ground_str_li[o],AxisOutOfBounds(super_saved_ground_f64_arr[o][0],is_x));
+    if (new_max_ground<=GROUND_NUM) { //new option is less than old
+      for (j=1;j<new_max_ground;j++) {
+        DocPrint(doc,",%1.0f",AxisOutOfBounds(super_saved_ground_f64_arr[o][j],is_x));
+      }
+    } else if (new_max_ground>GROUND_NUM) { //new option is more than old
+      for (j=1;j<GROUND_NUM;j++) {
+        DocPrint(doc,",%1.0f",AxisOutOfBounds(super_saved_ground_f64_arr[o][j],is_x));
+      }
+      for (j=GROUND_NUM;j<new_max_ground;j++) {
+        /*
+	1->1 1-1/2
+	2->1 2-2/2
+	3->2 3-3/2
+	4->2 4-4/2
+	5->3 5-5/2
+	6->3 6-6/2
+	*/
+        DocPrint(doc,",%d",5*((o+1)-((o+1)/2)));
+      }
+    }
+    DocPrint(doc,"};\n");
+  }
+  DocPrint(doc,"Bool saved_ground_is_ghost[GROUND_NUM]={%d",saved_ground_is_ghost[0]);
+  if (new_max_ground<=GROUND_NUM) {
+    for (j=1;j<new_max_ground;j++) {
+      DocPrint(doc,",%d",saved_ground_is_ghost[j]);
+    }
+  } else if (new_max_ground>GROUND_NUM) {
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",%d",saved_ground_is_ghost[j]);
+    }
+    for (j=GROUND_NUM;j<new_max_ground;j++) {
+      DocPrint(doc,",0");
+    }
+  }
+  DocPrint(doc,"};\n");
+  for (o=0;o<GROUND_I64_ATTRIBUTES_NUM;o++) {//Write ground I64
+    DocPrint(doc,"I64 saved_ground_%s[GROUND_NUM]={%d",
+	int_ground_str_li[GROUND_F64_ATTRIBUTES_NUM+GROUND_BOOL_ATTRIBUTES_NUM+o],
+	super_saved_ground_i64_arr[o][0]);
+    if (new_max_ground<=GROUND_NUM) {
+      for (j=1;j<new_max_ground;j++) {
+        DocPrint(doc,",%d",super_saved_ground_i64_arr[o][j]);
+      }
+    } else if (new_max_ground>GROUND_NUM) {
+      for (j=1;j<GROUND_NUM;j++) {
+        DocPrint(doc,",%d",super_saved_ground_i64_arr[o][j]);
+      }
+      for (j=GROUND_NUM;j<new_max_ground;j++) {
+        DocPrint(doc,",0");
+      }
+    }
+    DocPrint(doc,"};\n");
+  }
+ //Write ground Text
+  DocPrint(doc,"U8 *saved_ground_text[GROUND_NUM]={\\\"%s\\\"",saved_ground_text[0]);
+  if (new_max_ground<=GROUND_NUM) {
+    for (j=1;j<new_max_ground;j++) {
+      DocPrint(doc,",\\\"%s\\\"",saved_ground_text[j]);
+    }
+  } else if (new_max_ground>GROUND_NUM) {
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",\\\"%s\\\"",saved_ground_text[j]);
+    }
+    for (j=GROUND_NUM;j<new_max_ground;j++) {
+      DocPrint(doc,",\\\"\\\"");
+    }
+  }
+  DocPrint(doc,"};\n");
+  //Enemy Type
+  DocPrint(doc,"I64 saved_enemy_type[ENEMY_NUM]={%d",saved_enemy_type[0]);
+  if (new_max_enemy<=ENEMY_NUM) {//new option is less than old
+    for (o=1;o<new_max_enemy;o++) {
+      DocPrint(doc,",%d",saved_enemy_type[o]);
+    }
+  } else if (new_max_enemy>ENEMY_NUM) { //new option is more than old
+    for (o=1;o<ENEMY_NUM;o++) {
+      DocPrint(doc,",%d",saved_enemy_type[o]);
+    }
+    for (o=ENEMY_NUM;o<new_max_enemy;o++) {
+      DocPrint(doc,",0");
+    }
+  }
+  DocPrint(doc,"};\n");
+  //Enemy F64 (axis)
+  for (o=0;o<ENEMY_F64_ATTRIBUTES_NUM-2;o++) { //Enemies F64 (axis)
+    if (o<2) {//if axis
+      if (o==0) {
+        is_x=TRUE;
+      } else {
+        is_x=FALSE;
+      }
+      num=AxisOutOfBounds(super_saved_enemy_f64_attributes[o][0],is_x);
+    }
+    DocPrint(doc,"F64 saved_enemy_%s[ENEMY_NUM]={%1.0f",enemy_f64_attr_str_li[o],num);
+    if (new_max_enemy<=ENEMY_NUM) {//new option is less than old
+      for (j=1;j<new_max_enemy;j++) {
+	num=AxisOutOfBounds(super_saved_enemy_f64_attributes[o][j],is_x);
+        DocPrint(doc,",%1.0f",num);
+      }
+    } else if (new_max_enemy>ENEMY_NUM) { //new option is more than old
+      for (j=1;j<ENEMY_NUM;j++) {
+	num=AxisOutOfBounds(super_saved_enemy_f64_attributes[o][j],is_x);
+        DocPrint(doc,",%1.0f",num);
+      }
+      for (j=ENEMY_NUM;j<new_max_enemy;j++) {
+        DocPrint(doc,",25");
+      }      
+    }
+    DocPrint(doc,"};\n");
+  }
+//type
+  for (o=0;o<ENEMY_$ER$F64_ATTRIBUTES_NUM-2;o++) {//enemy f64 type
+    DocPrint(doc,"F64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%1.1f",enemy_f64_attr_str_li[o+2],super_saved_enemy_type_f64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%1.1f",super_saved_enemy_type_f64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_$ER$I64_ATTRIBUTES_NUM;o++) {//enemy i64 (type)
+    DocPrint(doc,"I64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_i64_attr_str_li[o],super_saved_enemy_type_i64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_saved_enemy_type_i64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_$ER$BOOL_ATTRIBUTES_NUM;o++) {//enemy bool (type)
+    DocPrint(doc,"Bool saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_bool_attr_str_li[o],super_saved_enemy_type_bool_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_saved_enemy_type_bool_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+//player
+  DocPrint(doc,"F64 saved_player_x=%1.0f,saved_player_y=%1.0f;\n",saved_player_x,saved_player_y);
+//Map
+  DocPrint(doc,"I64 map_background=%d;\n",map_background);
+  DocPrint(doc,"I64 custom_map_background_color=%d;\n",custom_map_background_color);
+  DocPrint(doc,"Bool is_inverted=%d;\n",is_inverted);
+  DocPrint(doc,"F64 saved_fb_x1=%5.4f,saved_fb_y1=%5.4f,saved_fb_x2=%5.4f,saved_fb_y2=%5.4f;\n",
+		saved_fb_x1,saved_fb_y1,saved_fb_x2,saved_fb_y2);
+  DocPrint(doc,"I64 gamemode=%d;\n",gamemode);
+  DocPrint(doc,"U8 *goal_text=\\\"%s\\\";\n",goal_text);
+//Version
+  DocPrint(doc,"F64 version=%1.3f;\n",CURRENT_VERSION);
+//End
+  DocPrint(doc,"\";\n");
+  DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\",load_map_txt);\n",LOADED_MAP_ID));
+  DocWrite(doc);
+  DocDel(doc);
+}
+
+U0 BugGameMapSettings()
+{
+  I64 arg1,arg2;
+  CTask *animate_menu;
+  SettingsPush;
+  AutoComplete;
+  WinBorder;
+  WinMax;
+  DocCursor;
+  DocClear;
+  GrPaletteSet(gr32_palette_std);
+  if (version==CURRENT_VERSION) {
+  //Correct Version
+  Fs->draw_it=&DrawMapSettings;
+  animate_menu=Fs->animate_task=Spawn(&AnimateMenu,NULL,"Task",,Fs);
+  try {
+    while (TRUE) {
+      switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+        case MESSAGE_KEY_DOWN:
+          switch(arg1) {
+            case 0:
+              switch (arg2.u8[0]) {
+                case SC_CURSOR_UP:               
+		  select_option=LimitValue(select_option-1,0,OPTION_NUM);
+                  break;
+                case SC_CURSOR_DOWN:                  
+		  select_option=LimitValue(select_option+1,0,OPTION_NUM);
+                  break;
+                case SC_CURSOR_LEFT:
+                  option[select_option]=LimitValue(
+			option[select_option]-1,
+			op_min_li[select_option],
+			op_max_li[select_option]);
+                  break;
+                case SC_CURSOR_RIGHT:
+                  option[select_option]=LimitValue(
+			option[select_option]+1,
+			op_min_li[select_option],
+			op_max_li[select_option]);
+                  break;
+              }
+              break;
+          }
+          break;
+	case MESSAGE_KEY_UP:
+	  switch (arg1) {
+	    case '\n':
+            case CH_ESC:
+              WriteMapNewSettings(LOADED_MAP_NAME,DEFAULT_EXTENSION);
+  	      //Reset Best Score
+  	      if (reset_best_score) {
+		RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesScores/slot_%d",LOADED_MAP_ID),
+	   		 "F64 best_score=9999;\n");
+	        PopUpOk(MStrPrint("$FG,2$\n\nBest Score of $FG,0$\"%s\"$FG$$FG,4$ $BK,1$Reset$FG$$BK,0$$FG,2$!$FG$\n$FG$$FG,2$\n\nMap Settings of $FG,0$\"%s\"$FG$$FG,10$ $BK,1$Saved$FG$$BK,0$$FG,2$!$FG$\n$FG$",LOADED_MAP_NAME,LOADED_MAP_NAME));
+  	      } else {
+	        PopUpOk(MStrPrint("$FG,2$\n\nMap Settings of $FG,0$\"%s\"$FG$$FG,10$ $BK,1$Saved$FG$$BK,0$$FG,2$!$FG$\n$FG$",LOADED_MAP_NAME));
+	      }
+	      Kill(animate_menu);
+	      JoinMapSelector(Here,animation_menu_sec,LOADED_MAP_ID,mse_type,0);
+	      Exit;
+              break;
+            case CH_SHIFT_ESC:
+	      JoinMapSelector(Here,animation_menu_sec,LOADED_MAP_ID,mse_type,-1);
+	      Exit;
+              break;
+            case 'r':
+              if (!reset_best_score) {
+		reset_best_score=TRUE;
+	      } else {
+		reset_best_score=FALSE;
+	      }
+	      break;
+	  }
+          break;
+      }
+    }  
+map_settings_done:
+  } catch
+    PutExcept;
+  SettingsPop;
+  MenuPop;
+  } else {//Incorect version
+    WrongVersionAct;
+    JoinMapSelector(Here,animation_menu_sec,LOADED_MAP_ID,mse_type,-1);
+    Exit;
+  }
+}
+
+BugGameMapSettings;

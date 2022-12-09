@@ -1,0 +1,231 @@
+
+Bool non_stop=TRUE;
+U0 StopSpace(U8 *msg)
+{
+  I64 arg1,arg2;
+  "%s",msg;
+  "$FG,1$\n\nPress $BK,1$['G']$BK,0$ to Continue.\n$FG$";
+  while (non_stop) {
+    switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+      case MESSAGE_KEY_UP:
+        switch (arg1) {
+          case 'g':
+          case 'G':
+	    non_stop=FALSE;
+	    break;
+      }
+    }
+    Sleep(1);
+  }
+}
+
+StopSpace(
+"$FG,4$\n\n$BK,1$Do not touch the keyboard until installation is Finished.$BK,0$\n$FG$
+\nIf there are old maps missing run this installer again.\n"
+);
+
+
+
+//-----------------v1_1 and later-----------------------
+if (FileFind("~/Insecticide_v1_0")) {//v1_1 and later
+  CopyTree("~/Insecticide_v1_0","~/Insecticide");//rename
+  DelTree("~/Insecticide_v1_0");
+}
+
+//------------------v1_3 and later----------------------
+if (FileFind("~/Insecticide/MapMaker")) {
+  DelTree("~/Insecticide/MapMaker");
+}
+if (FileFind("~/Insecticide/Game")) {
+  DelTree("~/Insecticide/Game");
+}
+if (FileFind("~/Insecticide/Scripts/LoadMap.ZC.Z")) {
+  Del("~/Insecticide/Scripts/LoadMap.ZC.Z*");
+}
+if (FileFind("~/Insecticide/Scripts/Rejoin.IN.Z")) {
+  Del("~/Insecticide/Scripts/Rejoin.IN.Z*");
+}
+//------------------------------------------------------
+
+
+//----------------v1_3_2 and later----------------------
+I64 GetFileAmount(U8 *dirname,U8 *extension)
+{
+  I64 file_amount=0;
+  U8 *st;
+  CDirEntry *tmpde;
+  dirname=StrNew(dirname);
+  st=MStrPrint("%s/*.%s",dirname,extension);
+  tmpde=FilesFind(st);
+  Free(st);
+  Free(dirname);
+  while (tmpde) {
+    st=StrNew(tmpde->name);
+    FileExtRemove(st);
+    tmpde=tmpde->next;
+    file_amount++;
+  }
+  return file_amount;
+}
+
+U0 SetDirList(U8 *dirname, U8 **arr,U8 *extension)
+{
+  I64 i=0;
+  U8 *st,*map;
+  CDirEntry *tmpde;
+  dirname=StrNew(dirname);
+  st=MStrPrint("%s/*.%s",dirname,extension);
+  tmpde=FilesFind(st);
+  Free(st);
+  Free(dirname);
+  while (tmpde) {
+    st=StrNew(tmpde->name);
+    FileExtRemove(st);
+    map=MStrPrint("%s",st);
+    arr[i]=map;
+    i++;
+    tmpde=tmpde->next;
+  }
+}
+
+//------------------------------------------------------
+#define	EXT	"HC.Z"
+I64 file_amount=100;
+U0 ConvertTXTToTOS2(U8 *dir,U8 **dir_list,I64 cnt,U8 *extension)
+{
+  I64 i;
+  for (i=0;i<cnt;i++) {
+    Copy(MStrPrint("%s/%s.TXT",dir,dir_list[i]),MStrPrint("%s/%s.%s",dir,dir_list[i],extension));
+    Del(MStrPrint("%s/%s.TXT*",dir,dir_list[i]));
+  }
+}
+
+U0 ConvertTXTToTOS(U8 *dir,U8 *extension)
+{
+  file_amount=GetFileAmount(dir,"TXT");
+  U8 **dir_list[file_amount];
+  "Files Found: %d\n",file_amount;
+  SetDirList(dir,dir_list,"TXT");
+  ConvertTXTToTOS2(dir,dir_list,file_amount,extension);
+}
+
+CopyTree("T:/Insecticide","~/Insecticide_TMP");
+
+ConvertTXTToTOS("~/Insecticide_TMP/Pages/Game/Actions",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Pages/Game/Draw",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Pages/Game",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Pages/MapEditor",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Pages",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Scripts/ZealOSPort/OldLevels",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Scripts/ZealOSPort",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/Scripts",EXT);
+
+ConvertTXTToTOS("~/Insecticide_TMP/LevelSaves/SavesStory",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/LevelSaves/SavesChallenges",EXT);
+
+ConvertTXTToTOS("~/Insecticide_TMP/LevelScripts/SavesStory",EXT);
+ConvertTXTToTOS("~/Insecticide_TMP/LevelScripts/SavesChallenges",EXT);
+
+ConvertTXTToTOS("~/Insecticide_TMP/",EXT);
+
+CopyTree("~/Insecticide_TMP","~/Insecticide");
+DelTree("~/Insecticide_TMP");
+
+//Post copying
+//v1.4.0 onwards
+
+
+CTask *create_reg;
+create_reg=User;
+XTalk(create_reg,"Cd(\"~/Insecticide\");\n");
+XTalk(create_reg,"#include \"Scripts/RegRelated\";\n");
+XTalk(create_reg,"Exit;\n");
+Sleep(100);
+
+
+if (FileFind("~/Insecticide/Saves")) {//Find Legacy Saves
+  CopyTree("~/Insecticide/Saves","~/InsectiSavesBackup");
+  CopyTree("~/Insecticide/Saves","~/InsectiSavesBakup2");
+  DelTree("~/Insecticide/Saves");
+}
+//Move old maps to registry
+if (FileFind("~/InsectiSavesBackup")) {
+  I64 old_map_count=30;
+  old_map_count=GetFileAmount("~/InsectiSavesBackup",EXT);
+  U8 **old_saves_name[old_map_count];
+  SetDirList("~/InsectiSavesBackup",old_saves_name,EXT);
+  I64 i;
+  CTask *user_tmp;
+  for (i=0;i<old_map_count;i++) {
+    user_tmp=User;//open new tmp terminal
+    XTalk(user_tmp,"Cd(\"~/Insecticide\");\n");
+    XTalk(user_tmp,"#include \"Scripts/Common\";\n");
+    XTalk(user_tmp,"#include \"Scripts/RegRelated\";\n");
+    XTalk(user_tmp,"#include \"Scripts/DefineClassValues\";\n");
+    XTalk(user_tmp,"#include \"Scripts/DefaultMapFormat\";\n");
+    XTalk(user_tmp,MStrPrint("#include \"~/InsectiSavesBackup/%s\";\n",old_saves_name[i]));
+    XTalk(user_tmp,"#include \"Scripts/SuperSaves\";\n");
+    XTalk(user_tmp,"#include \"Scripts/WriteMapToSlot\";\n");
+    XTalk(user_tmp,MStrPrint("WriteMapToSlot(\"MapTmp\",%d,\"%s\",DEFAULT_BEST_SCORE,default_level_script,DEFAULT_EXTENSION,TRUE);\n"
+			,i,old_saves_name[i]));
+    XTalk(user_tmp,"#include \"Tmp/MapTmp\";\n");
+    XTalk(user_tmp,"DelTree(\"Tmp\");\n");
+    XTalk(user_tmp,"Exit;\n");
+  }
+  non_stop=TRUE;
+  StopSpace(
+"$FG,4$\n\n$BK,1$Delete ~/InsectiSavesBackup after the old levels are transfered.$BK,0$\n
+\n$FG,4$If not all of the old levels are transfered, run this again.$FG$\n$FG$\n\n"
+  );
+}
+//------------------
+
+//1.4.00 onwards
+if (FileFind("~/Insecticide/SavesChallenges")) {//Find Saves
+  DelTree("~/Insecticide/SavesChallenges");
+}
+
+if (FileFind("~/Insecticide/SavesStory")) {//Find Saves
+  DelTree("~/Insecticide/SavesStory");
+}
+
+  //1.4.00 onwards Delete old files
+if (FileFind("~/Insecticide/Scripts/DefaultMapFormat2.ZC.Z")) {
+  Del("~/Insecticide/Scripts/DefaultMapFormat2.ZC.Z*");
+}
+if (FileFind("~/Insecticide/Pages/MainMenu.ZC.Z")) {
+  Del("~/Insecticide/Pages/MainMenu.ZC.Z*");
+}
+if (FileFind("~/Insecticide/Pages/MapRename.ZC.Z")) {
+  Del("~/Insecticide/Pages/MapRename.ZC.Z*");
+}
+if (FileFind("~/Insecticide/Pages/UpdateMap.ZC.Z")) {
+  Del("~/Insecticide/Pages/UpdateMap.ZC.Z*");
+}
+
+
+//-------------------
+
+
+//----1.4.03 onwards: Update maps---------
+#include "~/Insecticide/Scripts/RegRelated"
+
+U0 UpdateUnnamedMaps()
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    if (saves_name_arr[i][0]==' ') {//no name
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesLevels/slot_%d",i),default_level);//updates unnamed map
+    }
+  }
+}
+
+UpdateUnnamedMaps;
+//----------------------------------------
+
+
+//CopyTree("~/Insecticide/Scripts/ZealOSPort/OldLevels","~/Insecticide/Saves"); //Special
+
+"
+$FG,2$$BK,1$Insecticide v1_5_01 Successfully Updated & Installed$FG$$BK,0$$FG,2$!$FG$\n $FG,10$Read the README.DD for more Info.$FG$
+";

@@ -1,0 +1,335 @@
+
+//------Reg Write Related-------
+#define MAX_MAP_NUM  30
+
+U0 RegDftInit()
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    RegDefault(MStrPrint("TempleOS/Insecticide/Saves/SavesScores/slot_%d",i),"F64 best_score=9999;\n");
+  }
+}
+
+RegDftInit;
+F64 best_score_arr[MAX_MAP_NUM];
+//set best score array (RegExe doesnt work within functions)
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_0");
+best_score_arr[0]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_1");
+best_score_arr[1]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_2");
+best_score_arr[2]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_3");
+best_score_arr[3]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_4");
+best_score_arr[4]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_5");
+best_score_arr[5]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_6");
+best_score_arr[6]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_7");
+best_score_arr[7]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_8");
+best_score_arr[8]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_9");
+best_score_arr[9]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_10");
+best_score_arr[10]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_11");
+best_score_arr[11]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_12");
+best_score_arr[12]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_13");
+best_score_arr[13]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_14");
+best_score_arr[14]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_15");
+best_score_arr[15]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_16");
+best_score_arr[16]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_17");
+best_score_arr[17]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_18");
+best_score_arr[18]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_19");
+best_score_arr[19]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_20");
+best_score_arr[20]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_21");
+best_score_arr[21]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_22");
+best_score_arr[22]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_23");
+best_score_arr[23]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_24");
+best_score_arr[24]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_25");
+best_score_arr[25]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_26");
+best_score_arr[26]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_27");
+best_score_arr[27]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_28");
+best_score_arr[28]=best_score;
+RegExe("TempleOS/Insecticide/Saves/SavesScores/slot_29");
+best_score_arr[29]=best_score;
+
+U8 *default_level=
+"#define GROUND_NUM  1
+#define ENEMY_NUM 1
+#define MAP_WIDTH	800
+#define MAP_HEIGHT	640
+//Ground
+F64 saved_ground_x1[GROUND_NUM]={5};
+F64 saved_ground_y1[GROUND_NUM]={5};
+F64 saved_ground_x2[GROUND_NUM]={10};
+F64 saved_ground_y2[GROUND_NUM]={10};
+F64 saved_ground_x3[GROUND_NUM]={15};
+F64 saved_ground_y3[GROUND_NUM]={15};
+Bool saved_ground_is_ghost[GROUND_NUM]={0};
+I64 saved_ground_color[GROUND_NUM]={0},
+    saved_ground_type[GROUND_NUM]={0};
+U8 *saved_ground_text[GROUND_NUM]={\"\"};
+//Enemy
+I64 saved_enemy_type[ENEMY_NUM]={0};
+F64 saved_enemy_x[ENEMY_NUM]={25};
+F64 saved_enemy_y[ENEMY_NUM]={25};
+//Player
+F64 saved_player_x=100,saved_player_y=100;
+//type
+F64 saved_enemy_type_speed[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+F64 saved_enemy_type_bullet_speed[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+//v1.4.00 onwards
+I64 saved_enemy_type_species[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+//------
+I64 saved_enemy_type_follow_range[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_chase_range[ENEMY_TYPE_NUM]={100,100,100,100,100,100,100,100,100,100};
+I64 saved_enemy_type_unchase_range[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_shoot_at_player_range[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_aim_rand[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+I64 saved_enemy_type_color[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+I64 saved_enemy_type_speed_multiplier[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_health[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_cooldown[ENEMY_TYPE_NUM]={500,500,500,500,500,500,500,500,500,500};
+I64 saved_enemy_type_bullet_fire_cooldown[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+I64 saved_enemy_type_bullet_fire_at_once[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_length[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_damage[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_speed_multiplier[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_range[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_color[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_bullet_graphics_type[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+I64 saved_enemy_type_snd_dur[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_snd_pitch[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_snd_rand[ENEMY_TYPE_NUM]={1,1,1,1,1,1,1,1,1,1};
+I64 saved_enemy_type_death_snd_dur[ENEMY_TYPE_NUM]={30,30,30,30,30,30,30,30,30,30};
+I64 saved_enemy_type_death_snd_pitch[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+I64 saved_enemy_type_death_snd_rand[ENEMY_TYPE_NUM]={126,126,126,126,126,126,126,126,126,126};
+Bool saved_enemy_type_tyrant_immune[ENEMY_TYPE_NUM]={0,0,0,0,0,0,0,0,0,0};
+//map background
+I64 map_background=0;
+I64 custom_map_background_color=DKGRAY;
+Bool is_inverted=FALSE;
+//Finish box
+F64 saved_fb_x1=0,saved_fb_y1=0,saved_fb_x2=0,saved_fb_y2=0;
+//gamemode type
+I64 gamemode=0;
+U8 *goal_text=\"\";
+F64 version=1.501;\n";//RegRelated
+
+
+U0 RegSavesLevelsInit()
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    RegDefault(MStrPrint("TempleOS/Insecticide/Saves/SavesLevels/slot_%d",i),
+	   default_level
+    );
+  }
+}
+RegSavesLevelsInit;
+
+
+U0 RegSavesNameInit() 
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    RegDefault(MStrPrint("TempleOS/Insecticide/Saves/SavesNames/slot_%d",i),"U8 *slot_map_name=\" \";\n");
+  }
+}
+RegSavesNameInit;
+U8 **saves_name_arr[MAX_MAP_NUM];
+//set saves name array (RegExe doesnt work within functions)
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_0");
+saves_name_arr[0]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_1");
+saves_name_arr[1]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_2");
+saves_name_arr[2]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_3");
+saves_name_arr[3]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_4");
+saves_name_arr[4]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_5");
+saves_name_arr[5]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_6");
+saves_name_arr[6]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_7");
+saves_name_arr[7]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_8");
+saves_name_arr[8]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_9");
+saves_name_arr[9]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_10");
+saves_name_arr[10]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_11");
+saves_name_arr[11]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_12");
+saves_name_arr[12]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_13");
+saves_name_arr[13]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_14");
+saves_name_arr[14]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_15");
+saves_name_arr[15]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_16");
+saves_name_arr[16]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_17");
+saves_name_arr[17]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_18");
+saves_name_arr[18]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_19");
+saves_name_arr[19]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_20");
+saves_name_arr[20]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_21");
+saves_name_arr[21]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_22");
+saves_name_arr[22]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_23");
+saves_name_arr[23]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_24");
+saves_name_arr[24]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_25");
+saves_name_arr[25]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_26");
+saves_name_arr[26]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_27");
+saves_name_arr[27]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_28");
+saves_name_arr[28]=slot_map_name;
+RegExe("TempleOS/Insecticide/Saves/SavesNames/slot_29");
+saves_name_arr[29]=slot_map_name;
+
+U8 *default_level_script=
+"
+U8 *ScriptTxt=\"
+//Write a script to make the map more spicy
+//This runs before the game script
+
+U0 AnimateTaskLS0(I64)
+{
+ /* while (TRUE) {
+    //Insert code here
+    //player_color=LimitValue(player_color+1,0,16); //player rainbow color
+    Sleep(6);
+  }*/
+}
+
+
+U0 DrawItLS(CTask *,CDC *dc)
+{
+  //Insert code here
+  //dc->color=RED; //Draws a Red Circle at the center
+  //GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,50,50);
+}
+
+#define TASK_NUM	1
+CTask **ls_arr[TASK_NUM];
+
+U0 KillLS()
+{
+  //Insert Tasks here
+  I64 i;
+  for (i=0;i<TASK_NUM;i++) {
+    Kill(ls_arr[i]);
+  }
+}
+
+U0 RunLS()
+{
+//Insert Tasks here
+  CTask *animate_task_ls0=Fs->animate_task=Spawn(&AnimateTaskLS0,NULL,\\\"AnimateLS0\\\",,Fs);
+//CTask *animate_task_ls1=Fs->animate_task=Spawn(&AnimateTaskLS,NULL,\\\"AniamteLS1\\\",,Fs);
+  ls_arr[0]=animate_task_ls0;
+//ls_arr[1]=animate_task_ls1;
+}
+
+U0 InitLS()
+{
+//Insert Init here
+}
+\";\n";
+
+U0 RegSavesScriptsInit()
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    RegDefault(MStrPrint("TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d",i),
+           default_level_script);
+  }
+}
+RegSavesScriptsInit;
+
+
+//Controls
+RegDefault("TempleOS/Insecticide/Controls","
+I64 game_key_up='w',
+  game_key_down='s',
+  game_key_left='a',
+  game_key_right='d',
+  game_key_speedbreak='k',
+  game_key_uppercut='e',
+  game_key_change_web_mode='`',
+  game_key_attack='1',
+  game_key_regain_health='2',
+  game_key_regain_speedbreak='3',
+  game_key_regain_web='4',
+  game_key_pickup_web='q',
+  game_key_sprint=' ',
+  game_key_toggle_view='v',
+  game_key_the_bravery_tyrant='+',
+  saved_player_color=0,
+  cloud_type=1,
+  music_on=1,
+  sound_on=1,
+  screen_shake=1,
+  damage_flash=1;\n");
+
+
+I64 RegSavesMapCount()
+{
+  I64 i,cnt=0;
+  U8 *map_name_check="";
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    map_name_check=saves_name_arr[i];
+    if (map_name_check[0]!=' ') {
+      cnt++;
+    }
+  }
+  return cnt;
+}
+
+
+I64 RegSavesGetFirstEmptySlot()
+{
+  I64 i;
+  U8 *map_name_check="";
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    map_name_check=saves_name_arr[i];
+    if (map_name_check[0]!=' ') {
+      return i;
+    }
+  }
+}
+

@@ -1,0 +1,74 @@
+
+//Write a script to make the map more spicy
+//This runs before the game script
+
+U0 AnimateTaskLS0(I64)
+{
+  I64 i;
+  while (TRUE) {
+    //Insert code here
+    if (Enemy[0].health>0) {
+      for (i=1;i<ENEMY_NUM;i++) {
+        if (Enemy[i].type==1 && Enemy[i].health<=0 && GetDistance(Enemy[0].x,Enemy[0].y,Enemy[i].x,Enemy[i].y)<=NODE_SIZE*5) {
+          SetEnemyByType(i,2);
+        }
+      }
+    } else {
+      win=TRUE;
+    }
+    Sleep(6);
+  }
+}
+
+
+U0 DrawItLS(CTask *,CDC *dc)
+{
+}
+
+#define TASK_NUM	1
+CTask **ls_arr[TASK_NUM];
+
+U0 KillLS()
+{
+  //Insert Tasks here
+  I64 i;
+  for (i=0;i<TASK_NUM;i++) {
+    Kill(ls_arr[i]);
+  }
+}
+
+
+Bool once=TRUE;
+
+U0 TmpPopUp()
+{
+  PopUpOk("
+
+$BK,1$White Crawler Ability$BK,0$:
+
+$FG,3$-Time Breaker$FG$
+$FG,3$-Revival of the Fallen$FG$");
+  PopUpOk("
+
+$BK,1$Crawler Weak Points$BK,0$:
+
+$FG,3$-While not on the ground
+-When you're upside down and it's rightside up
+-When it's upside down and you're rightside up$FG$");
+}
+
+
+U0 RunLS()
+{
+//Insert Tasks here
+  CTask *animate_task_ls0=Fs->animate_task=Spawn(&AnimateTaskLS0,NULL,,,Fs);
+  ls_arr[0]=animate_task_ls0;
+}
+
+U0 InitLS()  //runs on last core
+{//Insert Init here
+  if (once) {
+    once=FALSE;
+    TmpPopUp;
+  }
+}

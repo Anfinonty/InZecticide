@@ -1,0 +1,31 @@
+
+
+U0 JoinMapSelector(U8 *here,I64 menu_sec,I64 s_o,I64 type,I64 map_action)
+{
+  CTask *user1=User;
+  XTalk(user1,MStrPrint("Cd(\"%s\");\n",here));
+  XTalk(user1,"DocClear;\n");
+  XTalk(user1,"#include \"Here\";\n");
+  XTalk(user1,"#include \"Scripts/Common\";\n");
+  XTalk(user1,MStrPrint("I64 select_option=%d;",s_o));
+  XTalk(user1,MStrPrint("I64 animation_menu_sec=%d;\n",menu_sec));
+  XTalk(user1,MStrPrint("I64 mse_type=%d;\n",type));
+  if (FileFind(MStrPrint("ScriptTmp.%s",DEFAULT_EXTENSION))) {
+    Del("ScriptTmp*");
+  }
+  switch (map_action) {
+    case 0:
+      XTalk(user1,"#include \"Tmp/SaveMap\";\n");
+      XTalk(user1,"DelTree(\"Tmp\");\n");
+      break;
+  }
+  switch (type) {
+    case 1:
+      XTalk(user1,"#include \"Pages/MapSelectChal\";\n");
+      break;
+    case 2:
+      XTalk(user1,"I64 copy_level_id_clipboard=-1;\n");
+      XTalk(user1,"#include \"Pages/MapSelect\";\n");
+      break;
+  }
+}

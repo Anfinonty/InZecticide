@@ -1,0 +1,1248 @@
+
+Cd(Here);;
+
+#define DUMMY_BULLET_NUM 5000
+#define MAX_MODE_NUM	6
+
+#include "Scripts/Click"
+#include "Scripts/Palettes"
+#include "Scripts/TxtInput"
+#include "Scripts/DefineClassValues"
+#include "Scripts/SuperSaves"
+#include "Scripts/JoinMapSelector"
+#include "Scripts/DrawWrongVersion"
+
+
+#include "Scripts/DefaultControls"
+RegExe("TempleOS/Insecticide/Controls");
+
+class DummyBullet
+{
+  F64 x;
+} DBullet[DUMMY_BULLET_NUM];
+
+
+I64 select_option=0,
+    sticky_level=0,
+    set_map_background=0,
+    set_custom_map_background_color=LTGRAY,
+    select_attribute=0,
+    me_enemy_id=0, 
+    me_enemy_type_id=0,
+    me_ground_id=0,
+    point_id=0,
+    current_dbullet_id=0,
+    animated_dbullet_delay=0,
+    animated_dbullet_fire_delay=0,
+    animated_dbullet_shot=0,
+    enemy_snd_dur_demo=0,
+    enemy_snd_pitch_demo=0,
+    enemy_snd_rand_demo=0;
+
+U8 *set_goal_text="",
+   *mode_str[MAX_MODE_NUM]={
+       "Set Grounds",
+       "Set Player",
+       "Set Enemy",
+       "Set Enemy Type",
+       "Set Gamemode",
+       "Background"
+     },
+   *set_ground_text[GROUND_NUM],
+   *clipboard_ground_text="";
+
+Bool set_ground_is_ghost[GROUND_NUM],
+     set_is_inverted=FALSE,
+     clipboard_ground_is_ghost,
+     open_help=TRUE;
+
+#define GROUND_TYPE_NUM	4
+
+I64 
+//Ground
+    set_ground_color[GROUND_NUM],
+    set_ground_type[GROUND_NUM],
+    ground_i64_attr_max[GROUND_I64_ATTRIBUTES_NUM]={16,GROUND_TYPE_NUM},
+    *super_set_ground_i64_attributes[GROUND_I64_ATTRIBUTES_NUM]={set_ground_color,set_ground_type},
+    clipboard_ground_color=0,
+    clipboard_ground_type=0,
+//Enemy
+    set_enemy_type[ENEMY_NUM],
+    clipboard_enemy_type=0,
+//Enemy Type
+    set_enemy_type_species[ENEMY_TYPE_NUM],
+    set_enemy_type_follow_range[ENEMY_TYPE_NUM],
+    set_enemy_type_unchase_range[ENEMY_TYPE_NUM],
+    set_enemy_type_chase_range[ENEMY_TYPE_NUM],
+    set_enemy_type_color[ENEMY_NUM],
+    set_enemy_type_speed_multiplier[ENEMY_TYPE_NUM],
+    set_enemy_type_health[ENEMY_TYPE_NUM],
+    set_enemy_type_shoot_at_player_range[ENEMY_TYPE_NUM],
+    set_enemy_type_aim_rand[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_cooldown[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_fire_cooldown[ENEMY_TYPE_NUM], 
+    set_enemy_type_bullet_fire_at_once[ENEMY_TYPE_NUM], 
+    set_enemy_type_bullet_length[ENEMY_TYPE_NUM], 
+    set_enemy_type_bullet_damage[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_speed_multiplier[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_range[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_color[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_graphics_type[ENEMY_TYPE_NUM],
+    set_enemy_type_snd_dur[ENEMY_TYPE_NUM],
+    set_enemy_type_snd_pitch[ENEMY_TYPE_NUM],
+    set_enemy_type_snd_rand[ENEMY_TYPE_NUM],
+    set_enemy_type_death_snd_dur[ENEMY_TYPE_NUM],
+    set_enemy_type_death_snd_pitch[ENEMY_TYPE_NUM],
+    set_enemy_type_death_snd_rand[ENEMY_TYPE_NUM],
+    set_enemy_type_tbt_rare[ENEMY_TYPE_NUM],
+    set_enemy_type_tbt_length[ENEMY_TYPE_NUM],
+
+    clipboard_enemy_type_species=0,
+    clipboard_enemy_type_follow_range=0,
+    clipboard_enemy_type_unchase_range=0,
+    clipboard_enemy_type_chase_range=0,
+    clipboard_enemy_type_color=0,
+    clipboard_enemy_type_speed_multiplier=0,
+    clipboard_enemy_type_health=0,
+    clipboard_enemy_type_shoot_at_player_range=0,
+    clipboard_enemy_type_aim_rand=0,
+    clipboard_enemy_type_bullet_cooldown=0,
+    clipboard_enemy_type_bullet_fire_cooldown=0,
+    clipboard_enemy_type_bullet_fire_at_once=0,
+    clipboard_enemy_type_bullet_length=0,
+    clipboard_enemy_type_bullet_damage=0,
+    clipboard_enemy_type_bullet_speed_multiplier=0,
+    clipboard_enemy_type_bullet_range=0,
+    clipboard_enemy_type_bullet_color=0,
+    clipboard_enemy_type_bullet_graphics_type=0,
+    clipboard_enemy_type_snd_dur=0,
+    clipboard_enemy_type_snd_pitch=0,
+    clipboard_enemy_type_snd_rand=0,
+    clipboard_enemy_type_death_snd_dur=0,
+    clipboard_enemy_type_death_snd_pitch=0,
+    clipboard_enemy_type_death_snd_rand=0,
+    clipboard_enemy_type_tbt_rare=0,
+    clipboard_enemy_type_tbt_length=0,
+
+    *super_set_enemy_type_i64_attributes[ENEMY_I64_ATTRIBUTES_NUM]={
+	set_enemy_type_species,
+	set_enemy_type_follow_range,
+	set_enemy_type_unchase_range,
+	set_enemy_type_chase_range,
+	set_enemy_type_color,
+	set_enemy_type_speed_multiplier,
+        set_enemy_type_health,
+        set_enemy_type_shoot_at_player_range,
+        set_enemy_type_aim_rand,
+        set_enemy_type_bullet_cooldown,
+        set_enemy_type_bullet_fire_cooldown,
+        set_enemy_type_bullet_fire_at_once,
+        set_enemy_type_bullet_length,
+        set_enemy_type_bullet_damage,
+        set_enemy_type_bullet_speed_multiplier,
+        set_enemy_type_bullet_range,
+        set_enemy_type_bullet_color,
+        set_enemy_type_bullet_graphics_type,
+        set_enemy_type_snd_dur,
+        set_enemy_type_snd_pitch,
+        set_enemy_type_snd_rand,
+        set_enemy_type_death_snd_dur,
+        set_enemy_type_death_snd_pitch,
+        set_enemy_type_death_snd_rand,
+        set_enemy_type_tbt_rare,
+        set_enemy_type_tbt_length
+    },
+  //min-max
+    enemy_i64_attr_min[ENEMY_I64_ATTRIBUTES_NUM]={
+	0,  //species
+	15, //follow range
+	0,  //unchase range
+	0,  //chase range
+	0,  //color
+	1,  //speed *
+	1,  //hp
+	1,  //shoot at player range
+	0,  //aim rand
+	1,  //bullet cd
+        0,  //bullet fire cd
+        1,  //bullet fire at once
+        1,  //bullet len
+	1,  //bullet dmg
+	1,  //bullet speed *
+	1,  //bullet range
+	0,  //bullet color
+	0,  //bullet graphics type
+	0,  //snd dur
+	0,  //snd pitch
+	0,  //snd rand
+	0,  //snd dur mort
+	0,  //snd pitch mort
+	0,   //snd rand mort
+	0,  //tbt rare
+	0   //tbt length
+    },
+    enemy_i64_attr_max[ENEMY_I64_ATTRIBUTES_NUM]={
+	2, //species
+	MAX_FOLLOW_RANGE+1,//follow range
+	MAX_FOLLOW_RANGE+1,//unchase range
+	MAX_FOLLOW_RANGE+1,//chase range
+	16, //color
+	5, //speed *
+	101, //hp
+	MAX_FOLLOW_RANGE+1,//shoot at player range
+	640+1,//aim rand
+	501,//bullet cd
+	501,//bullet fire cd
+	MAX_BULLET_PER_FIRE+1,//bullet fire at once
+	501,//bullet len
+	101,//bullet dmg
+	5,//bullet speed *
+	MAX_FOLLOW_RANGE+1,//bullet range
+	16, //bulelt color
+	5,  //bullet graphics type
+	200, //snd dur
+	127, //snd putch
+	127, //snd rand
+	200, //snd dur mort
+	127, //snd pitch mort
+	127,  //snd rand mort
+	10001//tbt rare
+        20001//tbt length
+   },
+   s_a_delta[ENEMY_I64_ATTRIBUTES_NUM]={
+	1, //species
+	1,//follow range
+	1,//unchase range
+	1,//chase range
+	1, //color
+	1, //speed *
+	1, //hp
+	1,//shoot at player range
+	1,//aim rand
+	1,//bullet cd
+	1,//bullet fire cd
+	1,//bullet fire at once
+	1,//bullet len
+	1,//bullet dmg
+	1,//bullet speed *
+	1,//bullet range
+	1, //bulelt color
+	1,  //bullet graphics type
+	1, //snd dur
+	1, //snd putch
+	1, //snd rand
+	1, //snd dur mort
+	1, //snd pitch mort
+	1,  //snd rand mort
+	25//tbt rare
+        25//tbt length
+   },
+  //gamemode
+    set_gamemode;
+
+Bool set_enemy_type_tyrant_immune[ENEMY_TYPE_NUM],
+     clipboard_enemy_type_tyrant_immune=0,
+     *super_set_enemy_type_bool_attributes[ENEMY_BOOL_ATTRIBUTES_NUM]={
+	set_enemy_type_tyrant_immune
+     };
+
+F64 animated_enemy_x=16,
+  //Player
+    set_player_x=saved_player_x,
+    set_player_y=saved_player_y,
+  //Ground
+    set_ground_x1[GROUND_NUM],
+    set_ground_y1[GROUND_NUM],
+    set_ground_x2[GROUND_NUM],
+    set_ground_y2[GROUND_NUM],
+    set_ground_x3[GROUND_NUM],
+    set_ground_y3[GROUND_NUM],
+    clipboard_ground_x1=5,
+    clipboard_ground_y1=5,
+    clipboard_ground_x2=10,
+    clipboard_ground_y2=10,
+    clipboard_ground_x3=15,
+    clipboard_ground_y3=15,
+    *super_set_ground_f64_attributes[GROUND_F64_ATTRIBUTES_NUM]={
+       set_ground_x1,set_ground_y1,set_ground_x2,set_ground_y2,set_ground_x3,set_ground_y3
+    },
+  //Enemy
+    set_enemy_x[ENEMY_NUM],
+    set_enemy_y[ENEMY_NUM],
+    clipboard_enemy_x=5,
+    clipboard_enemy_y=5,
+    *super_set_enemy_f64_attributes[ENEMY_F64_ATTRIBUTES_NUM-2]={
+	set_enemy_x,
+	set_enemy_y},
+  //Enemy type
+    set_enemy_type_speed[ENEMY_TYPE_NUM],
+    set_enemy_type_bullet_speed[ENEMY_TYPE_NUM],
+    clipboard_enemy_type_speed=0,
+    clipboard_enemy_type_bullet_speed=0,
+    *super_set_enemy_type_f64_attributes[ENEMY_F64_ATTRIBUTES_NUM-2]={
+	set_enemy_type_speed
+        set_enemy_type_bullet_speed},
+  //min-max
+    enemy_f64_attr_min[ENEMY_F64_ATTRIBUTES_NUM]={6,6,0.1,0.1},
+    enemy_f64_attr_max[ENEMY_F64_ATTRIBUTES_NUM]={MAP_WIDTH-6,MAP_HEIGHT-6,1.1,1.1},
+  //set finish box
+    set_fb_x1,
+    set_fb_y1,
+    set_fb_x2,
+    set_fb_y2;
+
+Bool set_x1=TRUE,set_x2=FALSE,set_x3=FALSE;
+
+
+#include "Scripts/Maths"
+#include "Scripts/DrawTriFill"
+#include "Pages/Game/Actions/BackgroundActions"
+#include "Pages/MapEditor/MapEditorDraw"
+#include "Pages/Game/Draw/DrawFinishBox"
+
+U0 AnimateTask(I64)
+{
+  I64 i,j,cur_x,cur_y;
+  F64 saved_x=0,saved_y=0;
+  while (TRUE) {
+    if (typing_timer>0) {
+      typing_timer--;
+    }
+    if (enemy_snd_dur_demo>0) {
+      enemy_snd_dur_demo=PlaySound(enemy_snd_dur_demo,enemy_snd_pitch_demo,enemy_snd_rand_demo);
+    }
+    if (set_x3 && set_ground_type[me_ground_id]!=3) { //if not trifill
+      set_x3=FALSE;
+      set_x1=TRUE;
+    }
+    Click;
+    if (right_click_hold_timer==62) {
+      if (set_x1) {
+        set_x1=FALSE;
+        set_x2=TRUE;
+      } else if (set_x2) {
+        set_x2=FALSE;
+	if (set_ground_type[me_ground_id]!=3) { //if trifill
+          set_x1=TRUE;
+	} else {
+          set_x3=TRUE;
+        }
+      } else if (set_x3) {
+	set_x3=FALSE;
+	set_x1=TRUE;
+      }
+    }
+    if (set_ground_type[me_ground_id]>0) {
+      set_ground_is_ghost[me_ground_id]=TRUE;
+    }
+    if (left_click_hold_timer==63) {
+      cur_x=mouse.pos.x-cam_x;
+      cur_y=mouse.pos.y-6-cam_y;
+      if (sticky_level>0) {
+        while (cur_x%(sticky_level)!=0) {
+          cur_x--;
+        }
+        while (cur_y%(sticky_level)!=0) {
+          cur_y--;
+        }       
+      }
+      if ((select_option<3 || select_option==4) &&
+          1<cur_x<MAP_WIDTH-2 && 
+          1<cur_y<MAP_HEIGHT-2) {        
+        switch (select_option) {
+          case 0:
+            if (-1<me_ground_id<GROUND_NUM) {
+              if (set_x1) {
+                set_ground_x1[me_ground_id]=cur_x;
+                set_ground_y1[me_ground_id]=cur_y;
+              } else if (set_x2) {
+                set_ground_x2[me_ground_id]=cur_x;
+                set_ground_y2[me_ground_id]=cur_y;
+              } else if (set_x3) {
+                set_ground_x3[me_ground_id]=cur_x;
+                set_ground_y3[me_ground_id]=cur_y;
+	      }
+              if (set_ground_x1[me_ground_id]>set_ground_x2[me_ground_id]) { //Swap X and Y if X1>X2
+                saved_x=set_ground_x2[me_ground_id];
+                set_ground_x2[me_ground_id]=set_ground_x1[me_ground_id];
+                set_ground_x1[me_ground_id]=saved_x;
+                saved_y=set_ground_y2[me_ground_id];
+                set_ground_y2[me_ground_id]=set_ground_y1[me_ground_id];
+                set_ground_y1[me_ground_id]=saved_y;
+              }
+	      if (set_ground_x1[me_ground_id]==set_ground_x2[me_ground_id]) {
+		set_ground_x2[me_ground_id]++;
+              }
+	      if (set_ground_x3[me_ground_id]==set_ground_x1[me_ground_id] ||
+                  set_ground_x3[me_ground_id]==set_ground_x2[me_ground_id]) {
+		set_ground_x3[me_ground_id]++;
+              }
+	      if (set_ground_type[me_ground_id]==3) {
+		if (set_ground_y1[me_ground_id]==set_ground_y2[me_ground_id]) {
+		  set_ground_y2[me_ground_id]++;
+		}
+	      }
+	      if (set_ground_y3[me_ground_id]==set_ground_y1[me_ground_id]) {
+		set_ground_y3[me_ground_id]++;
+              }
+	      if (set_ground_y3[me_ground_id]==set_ground_y2[me_ground_id]) {
+		set_ground_y3[me_ground_id]++;
+              }
+            }
+            break;
+          case 1:
+            set_player_x=cur_x;
+            set_player_y=cur_y;
+            break;
+          case 2:
+            set_enemy_x[me_enemy_id]=cur_x;
+            set_enemy_y[me_enemy_id]=cur_y;
+            break;
+	  case 4://gamemode
+	    if (set_gamemode==1) {
+            if (set_x1) {
+              set_fb_x1=cur_x;
+              set_fb_y1=cur_y;
+            } else if (set_x2) {
+              set_fb_x2=cur_x;
+              set_fb_y2=cur_y;
+            }
+            if (set_fb_x1>set_fb_x2) { //Swap X and Y if X1>X2
+              saved_x=set_fb_x2;
+              set_fb_x2=set_fb_x1;
+              set_fb_x1=saved_x;
+              saved_y=set_fb_y2;
+              set_fb_y2=set_fb_y1;
+              set_fb_y1=saved_y;
+            }
+	    }
+	    break;
+        }
+      }
+    }
+    if (select_option==3) {
+    // animated enemy
+      for (i=0;i<set_enemy_type_speed_multiplier[me_enemy_type_id];i++) {
+        animated_enemy_x=LimitValue(animated_enemy_x+set_enemy_type_speed[me_enemy_type_id],16,GR_WIDTH-16);
+      }
+    // animated bullet
+      if (animated_dbullet_fire_delay<=0) {
+        if (animated_dbullet_delay<=0) {
+	  animated_dbullet_delay=set_enemy_type_bullet_cooldown[me_enemy_type_id];
+          current_dbullet_id=LimitValue(current_dbullet_id+1,0,DUMMY_BULLET_NUM);
+          animated_dbullet_shot++;
+          if (animated_dbullet_shot>=set_enemy_type_bullet_length[me_enemy_type_id]) {
+	    animated_dbullet_fire_delay=set_enemy_type_bullet_fire_cooldown[me_enemy_type_id];
+	    animated_dbullet_shot=0;
+          }
+        } else {
+	  animated_dbullet_delay--;
+        }
+      } else {
+	animated_dbullet_fire_delay--;
+      }
+      for (i=0;i<current_dbullet_id;i++) {//every bullet until the current db_id
+        //move bullet
+	for (j=0;j<set_enemy_type_bullet_speed_multiplier[me_enemy_type_id];j++) {
+	  DBullet[i].x+=set_enemy_type_bullet_speed[me_enemy_type_id];
+	}
+      }
+      if (DBullet[0].x>=16+set_enemy_type_bullet_range[me_enemy_type_id]*NODE_SIZE/2) {
+	current_dbullet_id=0;
+        //bullet back to origin
+        for (i=0;i<DUMMY_BULLET_NUM;i++) {
+	  DBullet[i].x=16;
+        }
+      }
+    }
+    //misc
+    set_enemy_type_chase_range[me_enemy_type_id]=LimitValue(set_enemy_type_chase_range[me_enemy_type_id],0,set_enemy_type_unchase_range[me_enemy_type_id]);
+    set_enemy_type_unchase_range[me_enemy_type_id]=LimitValue(set_enemy_type_unchase_range[me_enemy_type_id],0,set_enemy_type_follow_range[me_enemy_type_id]);
+    BackgroundAct(set_map_background);
+    Sleep(6);
+  }
+}
+
+U0 DrawIt(CTask *task,CDC *dc)
+{
+  DrawBackground(task,dc,set_map_background,set_custom_map_background_color);
+  DrawMETriFills(task,dc);
+  DrawMEGround(task,dc);
+  DrawMEGrid(task,dc);
+  DrawMEGroundFloodfill(task,dc);
+  DrawMEGroundText(task,dc);
+  DrawMEGroundEdge(task,dc);
+  DrawMEPlayer(task,dc);
+  DrawMEEnemy(task,dc);
+  if (set_gamemode==1) {
+    DrawFinishBox(task,dc,set_fb_x1,set_fb_y1,set_fb_x2,set_fb_y2,set_x1);
+  }
+  DrawGUIDisplay(task,dc);
+}
+
+U0 WriteToSave1(U8* map_name,U8 *extension) //For editing
+{
+  I64 o,j;
+  DirMake("Tmp"); 
+  U8 *m=MStrPrint("Tmp/SaveMap.%s",extension);
+  CDoc *doc=DocNew(m);
+  DocPrint(doc,"U8 *load_map_txt=\"\n");
+//Start
+  DocPrint(doc,"#define GROUND_NUM %d\n",GROUND_NUM);
+  DocPrint(doc,"#define ENEMY_NUM %d\n",ENEMY_NUM);
+  DocPrint(doc,"#define MAP_WIDTH %d\n",MAP_WIDTH);
+  DocPrint(doc,"#define MAP_HEIGHT %d\n",MAP_HEIGHT);
+  for (o=0;o<GROUND_F64_ATTRIBUTES_NUM;o++) { //Ground F64
+    DocPrint(doc,"F64 saved_ground_%s[GROUND_NUM]={%1.0f",int_ground_str_li[o],super_set_ground_f64_attributes[o][0]);
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",%1.0f",super_set_ground_f64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  DocPrint(doc,"Bool saved_ground_is_ghost[GROUND_NUM]={%d",set_ground_is_ghost[0]);
+  for (o=1;o<GROUND_NUM;o++) {
+    DocPrint(doc,",%d",set_ground_is_ghost[o]);
+  }
+  DocPrint(doc,"};\n");
+  //Save ground I64 attributes
+  for (o=0;o<GROUND_I64_ATTRIBUTES_NUM;o++) {
+    DocPrint(doc,"I64 saved_ground_%s[GROUND_NUM]={%d",int_ground_str_li[GROUND_F64_ATTRIBUTES_NUM+GROUND_BOOL_ATTRIBUTES_NUM+o],super_set_ground_i64_attributes[o][0]);
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",%d",super_set_ground_i64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  //Save Ground Text
+  DocPrint(doc,"U8 *saved_ground_text[GROUND_NUM]={\\\"%s\\\"",set_ground_text[0]);
+  for (o=1;o<GROUND_NUM;o++) {
+    DocPrint(doc,",\\\"%s\\\"",set_ground_text[o]);
+  }
+  DocPrint(doc,"};\n");
+  //Enemy type
+  DocPrint(doc,"I64 saved_enemy_type[ENEMY_NUM]={%d",set_enemy_type[0]);
+  for (o=1;o<ENEMY_NUM;o++) {
+    DocPrint(doc,",%d",set_enemy_type[o]);
+  }
+  DocPrint(doc,"};\n");
+  //Enemy F64 (main)
+  for (o=0;o<ENEMY_F64_ATTRIBUTES_NUM-2;o++) {
+    DocPrint(doc,"F64 saved_enemy_%s[ENEMY_NUM]={%1.0f",enemy_f64_attr_str_li[o],super_set_enemy_f64_attributes[o][0]);
+    for (j=1;j<ENEMY_NUM;j++) {
+      DocPrint(doc,",%1.0f",super_set_enemy_f64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  //type
+  for (o=0;o<ENEMY_F64_ATTRIBUTES_NUM-2;o++) {
+    DocPrint(doc,"F64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%1.1f",enemy_f64_attr_str_li[o+2],super_set_enemy_type_f64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%1.1f",super_set_enemy_type_f64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_I64_ATTRIBUTES_NUM;o++) { //Enemy I64
+    DocPrint(doc,"I64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_i64_attr_str_li[o],super_set_enemy_type_i64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_set_enemy_type_i64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_BOOL_ATTRIBUTES_NUM;o++) { //Enemy Bool
+    DocPrint(doc,"Bool saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_bool_attr_str_li[o],super_set_enemy_type_bool_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_set_enemy_type_bool_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  //player
+  DocPrint(doc,"F64 saved_player_x=%1.0f,saved_player_y=%1.0f;\n",set_player_x,set_player_y);
+  //Map
+  DocPrint(doc,"I64 map_background=%d;\n",set_map_background);
+  DocPrint(doc,"I64 custom_map_background_color=%d;\n",set_custom_map_background_color);
+  DocPrint(doc,"Bool is_inverted=%d;\n",set_is_inverted);
+  DocPrint(doc,"I64 gamemode=%d;\n",set_gamemode);
+  DocPrint(doc,"F64 saved_fb_x1=%5.4f,saved_fb_y1=%5.4f,saved_fb_x2=%5.4f,saved_fb_y2=%5.4f;\n",
+		set_fb_x1,set_fb_y1,set_fb_x2,set_fb_y2);
+  DocPrint(doc,"U8 *goal_text=\\\"%s\\\";\n",set_goal_text);
+  //Version
+  DocPrint(doc,"F64 version=%1.3f;\n",CURRENT_VERSION);
+//End
+  DocPrint(doc,"\";\n");
+  DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\",load_map_txt);\n",LOADED_MAP_ID));
+  DocWrite(doc);
+  DocDel(doc);
+  PopUpOk(MStrPrint("$FG,2$\n\nChanges to Map$FG$$FG,0$ \"%s\"$FG$$FG,10$ $BK,1$Saved$FG$$BK,0$$FG,2$!$FG$\n$FG$",map_name));
+}
+
+U0 Init()
+{
+  I64 i,j,grid_x=0,grid_y=0;
+  select_option=0;
+//map background
+  set_map_background=map_background;
+  set_custom_map_background_color=custom_map_background_color;
+  set_is_inverted=is_inverted;
+  BackgroundInit;
+  if (set_map_background==1 || (set_is_inverted && set_map_background==2)) {
+    GrPaletteSet(game_gr_palette_dark);
+  }
+//set dummy bullet
+  for (i=0;i<DUMMY_BULLET_NUM;i++) {
+    DBullet[i].x=16;
+  }
+//set grid
+  for (i=0;i<GRID_NUM;i++) {
+    MEGrid[i].x1=grid_x;
+    MEGrid[i].y1=grid_y;
+    MEGrid[i].x2=MEGrid[i].x1+GRID_SIZE;
+    MEGrid[i].y2=MEGrid[i].y1+GRID_SIZE;
+    grid_x+=GRID_SIZE;
+    if (grid_x>MAP_WIDTH-GRID_SIZE) {
+      grid_x=0;
+      grid_y+=GRID_SIZE;
+    }
+  }
+//Set Player
+  cam_x=0;
+  cam_y=0;
+  CameraInit(saved_player_x-PLAYER_WIDTH/2,saved_player_y-PLAYER_HEIGHT/2);
+//MapEditorSet
+  //Ground
+  for (i=0;i<GROUND_NUM;i++) {
+    set_ground_is_ghost[i]=saved_ground_is_ghost[i];
+    set_ground_text[i]=saved_ground_text[i];
+  }
+  for (j=0;j<GROUND_I64_ATTRIBUTES_NUM;j++) {
+    for (i=0;i<GROUND_NUM;i++) {
+      super_set_ground_i64_attributes[j][i]=super_saved_ground_i64_arr[j][i];
+    }
+  }
+  for (j=0;j<GROUND_F64_ATTRIBUTES_NUM;j++) {
+    for (i=0;i<GROUND_NUM;i++) {
+      super_set_ground_f64_attributes[j][i]=super_saved_ground_f64_arr[j][i];
+    }
+  }
+  //Enemy I64 attr
+  for (i=0;i<ENEMY_NUM;i++) {
+    set_enemy_type[i]=saved_enemy_type[i];
+  }
+  //Enemy F64 attr
+  for (j=0;j<ENEMY_F64_ATTRIBUTES_NUM-2;j++) {
+    for (i=0;i<ENEMY_NUM;i++) {
+      super_set_enemy_f64_attributes[j][i]=super_saved_enemy_f64_attributes[j][i];
+    }
+  }
+  //Enemy Type I64
+  for (j=0;j<ENEMY_I64_ATTRIBUTES_NUM;j++) {
+    for (i=0;i<ENEMY_TYPE_NUM;i++) {
+      super_set_enemy_type_i64_attributes[j][i]=super_saved_enemy_type_i64_attributes[j][i];
+    }
+  }
+  //Enemy Type F64
+  for (j=0;j<ENEMY_F64_ATTRIBUTES_NUM-2;j++) {
+    for (i=0;i<ENEMY_TYPE_NUM;i++) {
+      super_set_enemy_type_f64_attributes[j][i]=super_saved_enemy_type_f64_attributes[j][i];
+    }
+  }
+  //Enemy Type Bool
+  for (j=0;j<ENEMY_BOOL_ATTRIBUTES_NUM;j++) {
+    for (i=0;i<ENEMY_TYPE_NUM;i++) {
+      super_set_enemy_type_bool_attributes[j][i]=super_saved_enemy_type_bool_attributes[j][i];
+    }
+  }  
+//Set Map Attributes
+  set_fb_x1=saved_fb_x1;
+  set_fb_x2=saved_fb_x2;
+  set_fb_y1=saved_fb_y1;
+  set_fb_y2=saved_fb_y2;
+  set_gamemode=gamemode;
+  set_goal_text=goal_text;
+}
+
+
+I64 InvertColor(I64 c)//c = color
+{
+  return c+15-c*2;
+}
+
+U0 InvertColorArr(I64 *color_arr,I64 max)
+{
+  I64 i;
+  for (i=0;i<max;i++) {
+    if (color_arr[i]!=WHITE && color_arr[i]!=BLACK) {
+      color_arr[i]=InvertColor(color_arr[i]);
+    }
+  }
+}
+
+U0 TotalInvert(Bool night_invert)
+{
+  InvertColorArr(set_ground_color,GROUND_NUM);
+  InvertColorArr(set_enemy_type_color,ENEMY_TYPE_NUM);
+  InvertColorArr(set_enemy_type_bullet_color,ENEMY_TYPE_NUM);
+  set_custom_map_background_color=InvertColor(set_custom_map_background_color);
+  if (night_invert) {
+    GrPaletteSet(game_gr_palette_dark);
+  } else {
+    GrPaletteSet(gr32_palette_std);
+  }
+}
+
+U0 BugGameMapMaker()
+{
+  Bool save=FALSE,is_win_border=TRUE;
+  I64 arg1,arg2,s_a;
+  F64 num;
+  SettingsPush;
+  AutoComplete;
+  //WinBorder;
+  WinMax;
+  DocCursor;
+  DocClear;
+  if (version==CURRENT_VERSION) {
+  //Correct version
+  Init;
+  Fs->animate_task=Spawn(&AnimateTask,NULL,"Task",,Fs);
+  Fs->draw_it=&DrawIt;
+  try {
+    while (TRUE) {
+      //if (!typing) {
+      switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+        case MESSAGE_KEY_DOWN:
+          switch (arg1) {
+            case 0:
+              switch (arg2.u8[0]) {
+                case SC_CURSOR_RIGHT:
+		  switch (select_option) {
+		    case 0:
+		      switch (select_attribute) {
+			case 0:
+			  set_ground_is_ghost[me_ground_id]=LimitValue(set_ground_is_ghost[me_ground_id]+1,0,2);
+			  break;
+			case 1:
+			  super_set_ground_i64_attributes[select_attribute-1][me_ground_id]=LimitValue(super_set_ground_i64_attributes[select_attribute-1][me_ground_id]+1,0,ground_i64_attr_max[select_attribute-1]);
+			  break;
+			case 2:
+			  if ((set_ground_type[me_ground_id]==0 && set_ground_is_ghost[me_ground_id]) ||
+                               set_ground_type[me_ground_id]>0) {
+			    super_set_ground_i64_attributes[select_attribute-1][me_ground_id]=LimitValue(super_set_ground_i64_attributes[select_attribute-1][me_ground_id]+1,0,ground_i64_attr_max[select_attribute-1]);
+			  }
+			  break;
+		      }
+		      break;
+		    case 2:
+		      if (select_attribute>0) {
+		        s_a=select_attribute-1;
+		        if (s_a<2) {
+		          num=1;
+                        } else {
+		          num=0.1;
+                        }
+                        super_set_enemy_f64_attributes[s_a][me_enemy_id]=
+	  		    LimitValue(super_set_enemy_f64_attributes[s_a][me_enemy_id]+num,
+				enemy_f64_attr_min[s_a],
+				enemy_f64_attr_max[s_a]-0.1);
+		      } else { //Set Enemy Type
+		        set_enemy_type[me_enemy_id]=
+		  	    LimitValue(set_enemy_type[me_enemy_id]+1,0,ENEMY_TYPE_NUM);
+		      }
+                      break;
+		    case 3: //Enemy Type 
+		      s_a=select_attribute;
+		      if (s_a>=ENEMY_F64_ATTRIBUTES_NUM-2) {
+			if (s_a<ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_I64_ATTRIBUTES_NUM) {
+		          s_a=select_attribute-(ENEMY_F64_ATTRIBUTES_NUM-2);
+                          super_set_enemy_type_i64_attributes[s_a][me_enemy_type_id]=
+                            LimitValue(super_set_enemy_type_i64_attributes[s_a][me_enemy_type_id]+s_a_delta[s_a],
+                                 enemy_i64_attr_min[s_a],
+                                 enemy_i64_attr_max[s_a]);
+			} else {
+		          s_a=select_attribute-(ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_I64_ATTRIBUTES_NUM);
+                          super_set_enemy_type_bool_attributes[s_a][me_enemy_type_id]=
+                            LimitValue(super_set_enemy_type_bool_attributes[s_a][me_enemy_type_id]+1,
+                                 0,
+                                 2);
+			}
+		      } else {
+		        num=0.1;
+                        super_set_enemy_type_f64_attributes[s_a][me_enemy_type_id]=
+			    LimitValue(super_set_enemy_type_f64_attributes[s_a][me_enemy_type_id]+num,
+				enemy_f64_attr_min[s_a+2],
+				enemy_f64_attr_max[s_a+2]-0.1);
+		      }
+		      break;
+		    case 4: //Gamemode
+		      switch (select_attribute) {
+			case 0:
+			  set_gamemode=LimitValue(set_gamemode+1,0,GAMEMODE_NUM);
+			  break;
+		      }
+		      break;
+		    case 5://Background+1
+		      switch (select_attribute) {
+			case 0:// background type
+			  switch (set_map_background) {
+			    case 0:
+			      TotalInvert(TRUE);
+			      break;
+			    case 1:
+			      if (!set_is_inverted) {
+			        TotalInvert(FALSE);
+			      }
+			      break;
+			    case 2:
+			      if (set_is_inverted) {
+			        TotalInvert(FALSE);
+			      }
+			      break;
+			  }
+              		  set_map_background=LimitValue(set_map_background+1,0,3);
+			  break;
+			case 1:// background color
+			  set_custom_map_background_color=LimitValue(set_custom_map_background_color+1,0,16);
+			  break;
+			case 2:// is inverted
+			  if (set_map_background==2) {
+			    set_is_inverted=LimitValue(set_is_inverted+1,0,2);
+			    TotalInvert(set_is_inverted);
+			  }
+			  break;
+		      }
+		      break;
+		    }		  
+		    break;
+                case SC_CURSOR_LEFT:
+		  switch (select_option) {
+		    case 0:
+		      switch (select_attribute) {
+			case 0:
+			  set_ground_is_ghost[me_ground_id]=LimitValue(set_ground_is_ghost[me_ground_id]+1,0,2);
+			  break;
+			case 1:
+			  super_set_ground_i64_attributes[select_attribute-1][me_ground_id]=LimitValue(super_set_ground_i64_attributes[select_attribute-1][me_ground_id]-1,0,ground_i64_attr_max[select_attribute-1]);
+			  break;
+			case 2:
+			  if ((set_ground_type[me_ground_id]==0 && set_ground_is_ghost[me_ground_id]) ||
+                               set_ground_type[me_ground_id]>0) {
+			    super_set_ground_i64_attributes[select_attribute-1][me_ground_id]=LimitValue(super_set_ground_i64_attributes[select_attribute-1][me_ground_id]-1,0,ground_i64_attr_max[select_attribute-1]);
+			  }
+			  break;
+		      }
+		      break;
+		    case 2:
+		      if (select_attribute>0) {
+		        s_a=select_attribute-1;
+		        if (s_a<2) {
+		          num=1;
+                        } else {
+		          num=0.1;
+                        }
+                        super_set_enemy_f64_attributes[s_a][me_enemy_id]=
+                            LimitValue(super_set_enemy_f64_attributes[s_a][me_enemy_id]-num,
+                               enemy_f64_attr_min[s_a],
+                               enemy_f64_attr_max[s_a]+0.9);
+		      } else { //Set Enemy Type
+		        set_enemy_type[me_enemy_id]=
+		          LimitValue(set_enemy_type[me_enemy_id]-1,
+	     			 0,
+			      ENEMY_TYPE_NUM);
+		      }
+		      break;
+		    case 3: //Enemy Type
+		      s_a=select_attribute;
+		      if (s_a>=ENEMY_F64_ATTRIBUTES_NUM-2) {
+			if (s_a<ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_I64_ATTRIBUTES_NUM) {
+		          s_a=select_attribute-(ENEMY_F64_ATTRIBUTES_NUM-2);
+                          super_set_enemy_type_i64_attributes[s_a][me_enemy_type_id]=
+                            LimitValue(super_set_enemy_type_i64_attributes[s_a][me_enemy_type_id]-s_a_delta[s_a],
+                                 enemy_i64_attr_min[s_a],
+                                 enemy_i64_attr_max[s_a]);
+			} else {
+		          s_a=select_attribute-(ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_I64_ATTRIBUTES_NUM);
+                          super_set_enemy_type_bool_attributes[s_a][me_enemy_type_id]=
+                            LimitValue(super_set_enemy_type_bool_attributes[s_a][me_enemy_type_id]-1,
+                                 0,
+                                 2);
+			}
+		      } else {
+		        num=0.1;
+                        super_set_enemy_type_f64_attributes[s_a][me_enemy_type_id]=
+			  LimitValue(super_set_enemy_type_f64_attributes[s_a][me_enemy_type_id]-num,
+				enemy_f64_attr_min[s_a+2],
+				enemy_f64_attr_max[s_a+2]+0.9);
+		      }
+		      break;
+		    case 4: //Gamemode
+		      switch (select_attribute) {
+			case 0:
+			  set_gamemode=LimitValue(set_gamemode-1,0,GAMEMODE_NUM);
+			  break;
+		      }
+		      break;
+		    case 5://Background-1
+		      switch (select_attribute) {
+			case 0:// background type
+			  switch (set_map_background) {
+			    case 0:
+			      if (set_is_inverted) {
+			        TotalInvert(TRUE);
+			      }
+			      break;
+			    case 1:
+			      TotalInvert(FALSE);
+			      break;
+			    case 2:
+			      if (!set_is_inverted) {
+			        TotalInvert(TRUE);
+			      }
+			      break;
+			  }
+              		  set_map_background=LimitValue(set_map_background-1,0,3);
+			  break;
+			case 1:// background color
+			  set_custom_map_background_color=LimitValue(set_custom_map_background_color-1,0,16);
+			  break;
+			case 2:// is inverted
+			  if (set_map_background==2) {
+			    set_is_inverted=LimitValue(set_is_inverted-1,0,2);
+			    TotalInvert(set_is_inverted);
+			  }
+			  break;
+		      }
+		      break;
+		  }
+                  break;
+                case SC_CURSOR_UP:
+		  switch (select_option) {
+		    case 0:
+		      if (set_ground_is_ghost[me_ground_id]) {
+		        select_attribute=LimitValue(select_attribute-1,0,3);
+		      } else {
+		        select_attribute=LimitValue(select_attribute-1,0,2);
+		      }
+		      break;
+		    case 2:
+	      	      select_attribute=LimitValue(select_attribute-1,0,3);
+	              break;
+		    case 3:
+		      select_attribute=LimitValue(select_attribute-1,0,ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_BOOL_ATTRIBUTES_NUM);
+		      break;
+		    //case 4:
+		      //select_attribute=LimitValue(select_attribute-1,0,2);
+		      //break;
+		    case 5:
+		      if (set_map_background!=2) {
+		        select_attribute=LimitValue(select_attribute-1,0,2);
+		      } else {
+		        select_attribute=LimitValue(select_attribute-1,0,3);
+		      }
+		      break;
+		  }
+		  break;
+                case SC_CURSOR_DOWN:
+		  switch (select_option) {
+		    case 0:
+		      if (set_ground_is_ghost[me_ground_id]) {
+		        select_attribute=LimitValue(select_attribute+1,0,3);
+		      } else {
+		        select_attribute=LimitValue(select_attribute+1,0,2);
+		      }
+		      break;
+		    case 2:
+		      select_attribute=LimitValue(select_attribute+1,0,3);
+		      break;
+		    case 3:
+		      select_attribute=LimitValue(select_attribute+1,0,ENEMY_I64_ATTRIBUTES_NUM+ENEMY_F64_ATTRIBUTES_NUM-2+ENEMY_BOOL_ATTRIBUTES_NUM);
+		      break;
+		    //case 4:
+		      //select_attribute=LimitValue(select_attribute+1,0,);
+		      //break;
+		    case 5:
+		      if (set_map_background!=2) {
+		        select_attribute=LimitValue(select_attribute+1,0,2);
+		      } else {
+		        select_attribute=LimitValue(select_attribute+1,0,3);
+		      }
+		      break;
+		  }
+                  break;
+	      }
+              break;
+            case 'w': //cam up
+	      if (cam_y<GR_HEIGHT/2) {
+                cam_y+=20;
+	      }
+              break;
+            case 'a': //cam down
+	      if (cam_x<GR_WIDTH/2) {
+                cam_x+=20;
+	      }
+              break;
+            case 's': //down
+	      if (cam_y>-MAP_HEIGHT+GR_HEIGHT/2) {
+                cam_y-=20;
+	      }
+              break;
+            case 'd'://right
+	      if (cam_x>-MAP_WIDTH+GR_WIDTH/2) {
+                cam_x-=20;
+	      }
+              break;
+	    case 'M':
+	      is_win_border=!is_win_border;
+	      WinBorder(is_win_border);
+	    case 'L':
+	      if (select_option==3) {
+	        enemy_snd_dur_demo=set_enemy_type_death_snd_dur[me_enemy_type_id];
+		enemy_snd_pitch_demo=set_enemy_type_death_snd_pitch[me_enemy_type_id];
+		enemy_snd_rand_demo=set_enemy_type_death_snd_rand[me_enemy_type_id];
+	      }
+	      break;
+	    case 'l':
+	      if (select_option==3) {
+	        enemy_snd_dur_demo=set_enemy_type_snd_dur[me_enemy_type_id];
+		enemy_snd_pitch_demo=set_enemy_type_snd_pitch[me_enemy_type_id];
+		enemy_snd_rand_demo=set_enemy_type_snd_rand[me_enemy_type_id];
+	      }
+	      break;
+	    case 'm':
+	      enemy_snd_dur_demo=0;
+	      enemy_snd_pitch_demo=0;
+	      enemy_snd_rand_demo=0;
+	      Sound;
+	      break;
+	    case 'F':
+	      cam_x=cam_y=0;
+	      switch (select_option) {
+  		case 0:
+		  if (set_x1) {
+	            CameraInit(set_ground_x1[me_ground_id],set_ground_y1[me_ground_id]);
+		  } else if (set_x2) {
+	            CameraInit(set_ground_x2[me_ground_id],set_ground_y2[me_ground_id]);
+		  }
+		  break;
+		case 1:
+	          CameraInit(set_player_x,set_player_y);
+		  break;
+		case 2:
+	          CameraInit(set_enemy_x[me_enemy_id],set_enemy_y[me_enemy_id]);
+		  break;
+	      }
+	      break;
+	    case CH_CTRLF:
+	      if (select_option==0 || select_option==2) {
+	        typing=TRUE;
+		if (select_option==0) {
+	          me_ground_id=TypeKey(0,"",me_ground_id,GROUND_NUM);
+		} else {
+	          me_enemy_id=TypeKey(0,"",me_enemy_id,ENEMY_NUM);
+		}
+	      }
+	      break;
+	    case '\n':
+	      if (select_option==0 && set_ground_is_ghost[me_ground_id] && set_ground_type[me_ground_id]==2) {
+	        typing=TRUE; //force typing mode all keys stop	     
+	        set_ground_text[me_ground_id]=TypeKey(1,set_ground_text[me_ground_id],NULL,NULL);
+	      } else if (select_option==4 && set_gamemode==1) {
+                typing=TRUE;
+		set_goal_text=TypeKey(1,set_goal_text,NULL,NULL);
+              }
+	      break;
+            case 'x':
+              switch (select_option) {
+                case 0:
+  		me_ground_id=LimitValue(me_ground_id+1,0,GROUND_NUM);
+		select_attribute=0;
+                break;
+              case 2:
+		me_enemy_id=LimitValue(me_enemy_id+1,0,ENEMY_NUM);
+                break;
+	      case 3:
+		me_enemy_type_id=LimitValue(me_enemy_type_id+1,0,ENEMY_TYPE_NUM);
+		break;
+              }
+	      break;
+	    case 'z':
+              switch (select_option) {
+	        case 0:
+                  me_ground_id=LimitValue(me_ground_id-1,0,GROUND_NUM);
+		  select_attribute=0;
+		  break;
+	        case 2:
+                  me_enemy_id=LimitValue(me_enemy_id-1,0,ENEMY_NUM);
+		  break;
+	        case 3:
+		  me_enemy_type_id=LimitValue(me_enemy_type_id-1,0,ENEMY_TYPE_NUM);
+		  break;
+	      }
+	      break;
+	    case '"':
+	      sticky_level=LimitValue(sticky_level+1,0,64);
+              break;
+	    case ':':
+	      sticky_level=LimitValue(sticky_level-1,0,64);
+              break;
+          }
+          break;
+        case MESSAGE_KEY_UP:
+          switch (arg1) {
+            case CH_CTRLC:
+              switch (select_option) {
+		case 0://ground
+		  clipboard_ground_x1=set_ground_x1[me_ground_id];
+		  clipboard_ground_y1=set_ground_y1[me_ground_id];
+		  clipboard_ground_x2=set_ground_x2[me_ground_id];
+		  clipboard_ground_y2=set_ground_y2[me_ground_id];
+		  clipboard_ground_x3=set_ground_x3[me_ground_id];
+		  clipboard_ground_y3=set_ground_y3[me_ground_id];
+		  clipboard_ground_is_ghost=set_ground_is_ghost[me_ground_id];
+		  clipboard_ground_color=set_ground_color[me_ground_id];
+		  clipboard_ground_type=set_ground_type[me_ground_id];
+		  clipboard_ground_text=set_ground_text[me_ground_id];
+		  break;
+		case 2://enemy
+		  clipboard_enemy_x=set_enemy_x[me_enemy_id];
+		  clipboard_enemy_y=set_enemy_y[me_enemy_id];
+		  clipboard_enemy_type=set_enemy_type[me_enemy_id];
+		  break;
+		case 3://enemy type
+		  clipboard_enemy_type_speed=set_enemy_type_speed[me_enemy_type_id];
+		  clipboard_enemy_type_bullet_speed=set_enemy_type_bullet_speed[me_enemy_type_id];
+		  clipboard_enemy_type_species=set_enemy_type_species[me_enemy_type_id];
+    		  clipboard_enemy_type_follow_range=set_enemy_type_follow_range[me_enemy_type_id];
+    		  clipboard_enemy_type_unchase_range=set_enemy_type_unchase_range[me_enemy_type_id];
+    		  clipboard_enemy_type_chase_range=set_enemy_type_chase_range[me_enemy_type_id];
+    		  clipboard_enemy_type_color=set_enemy_type_color[me_enemy_type_id];
+    		  clipboard_enemy_type_speed_multiplier=set_enemy_type_speed_multiplier[me_enemy_type_id];
+   		  clipboard_enemy_type_health=set_enemy_type_health[me_enemy_type_id];
+   		  clipboard_enemy_type_shoot_at_player_range=set_enemy_type_shoot_at_player_range[me_enemy_type_id];
+   		  clipboard_enemy_type_aim_rand=set_enemy_type_aim_rand[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_cooldown=set_enemy_type_bullet_cooldown[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_fire_cooldown=set_enemy_type_bullet_fire_cooldown[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_fire_at_once=set_enemy_type_bullet_fire_at_once[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_length=set_enemy_type_bullet_length[me_enemy_type_id];
+    		  clipboard_enemy_type_bullet_damage=set_enemy_type_bullet_damage[me_enemy_type_id];
+    		  clipboard_enemy_type_bullet_speed_multiplier=set_enemy_type_bullet_speed_multiplier[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_range=set_enemy_type_bullet_range[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_color=set_enemy_type_bullet_color[me_enemy_type_id];
+   		  clipboard_enemy_type_bullet_graphics_type=set_enemy_type_bullet_graphics_type[me_enemy_type_id];
+   		  clipboard_enemy_type_snd_dur=set_enemy_type_snd_dur[me_enemy_type_id];
+   		  clipboard_enemy_type_snd_pitch=set_enemy_type_snd_pitch[me_enemy_type_id];
+   		  clipboard_enemy_type_snd_rand=set_enemy_type_snd_rand[me_enemy_type_id];
+  		  clipboard_enemy_type_death_snd_dur=set_enemy_type_death_snd_dur[me_enemy_type_id];
+  		  clipboard_enemy_type_death_snd_pitch=set_enemy_type_death_snd_pitch[me_enemy_type_id];
+  		  clipboard_enemy_type_death_snd_rand=set_enemy_type_death_snd_rand[me_enemy_type_id];
+  		  clipboard_enemy_type_tbt_rare=set_enemy_type_tbt_rare[me_enemy_type_id];
+  		  clipboard_enemy_type_tbt_length=set_enemy_type_tbt_length[me_enemy_type_id];
+  		  clipboard_enemy_type_tyrant_immune=set_enemy_type_tyrant_immune[me_enemy_type_id];
+		  break;
+              }
+              break;
+            case CH_CTRLV:
+              switch (select_option) {
+		case 0://ground
+		  set_ground_x1[me_ground_id]=clipboard_ground_x1;
+		  set_ground_y1[me_ground_id]=clipboard_ground_y1;
+		  set_ground_x2[me_ground_id]=clipboard_ground_x2;
+		  set_ground_y2[me_ground_id]=clipboard_ground_y2;
+		  set_ground_x3[me_ground_id]=clipboard_ground_x3;
+		  set_ground_y3[me_ground_id]=clipboard_ground_y3;
+		  set_ground_is_ghost[me_ground_id]=clipboard_ground_is_ghost;
+		  set_ground_color[me_ground_id]=clipboard_ground_color;
+		  set_ground_type[me_ground_id]=clipboard_ground_type;
+		  set_ground_text[me_ground_id]=clipboard_ground_text;
+		  break;
+		case 2://enemy
+		  set_enemy_x[me_enemy_id]=clipboard_enemy_x;
+		  set_enemy_y[me_enemy_id]=clipboard_enemy_y;
+		  set_enemy_type[me_enemy_id]=clipboard_enemy_type;
+		  break;
+		case 3://enemy type
+		  set_enemy_type_speed[me_enemy_type_id]=clipboard_enemy_type_speed;
+		  set_enemy_type_bullet_speed[me_enemy_type_id]=clipboard_enemy_type_bullet_speed;
+    		  set_enemy_type_species[me_enemy_type_id]=clipboard_enemy_type_species;
+    		  set_enemy_type_follow_range[me_enemy_type_id]=clipboard_enemy_type_follow_range;
+    		  set_enemy_type_unchase_range[me_enemy_type_id]=clipboard_enemy_type_unchase_range;
+    		  set_enemy_type_chase_range[me_enemy_type_id]=clipboard_enemy_type_chase_range;
+    		  set_enemy_type_color[me_enemy_type_id]=clipboard_enemy_type_color;
+    		  set_enemy_type_speed_multiplier[me_enemy_type_id]=clipboard_enemy_type_speed_multiplier;
+   		  set_enemy_type_health[me_enemy_type_id]=clipboard_enemy_type_health;
+   		  set_enemy_type_shoot_at_player_range[me_enemy_type_id]=clipboard_enemy_type_shoot_at_player_range;
+   		  set_enemy_type_aim_rand[me_enemy_type_id]=clipboard_enemy_type_aim_rand;
+   		  set_enemy_type_bullet_cooldown[me_enemy_type_id]=clipboard_enemy_type_bullet_cooldown;
+  		  set_enemy_type_bullet_fire_cooldown[me_enemy_type_id]=clipboard_enemy_type_bullet_fire_cooldown;
+  		  set_enemy_type_bullet_fire_at_once[me_enemy_type_id]=clipboard_enemy_type_bullet_fire_at_once;
+  		  set_enemy_type_bullet_length[me_enemy_type_id]=clipboard_enemy_type_bullet_length;
+    		  set_enemy_type_bullet_damage[me_enemy_type_id]=clipboard_enemy_type_bullet_damage;
+    		  set_enemy_type_bullet_speed_multiplier[me_enemy_type_id]=clipboard_enemy_type_bullet_speed_multiplier;
+   		  set_enemy_type_bullet_range[me_enemy_type_id]=clipboard_enemy_type_bullet_range;
+   		  set_enemy_type_bullet_color[me_enemy_type_id]=clipboard_enemy_type_bullet_color;
+   		  set_enemy_type_bullet_graphics_type[me_enemy_type_id]=clipboard_enemy_type_bullet_graphics_type;
+   		  set_enemy_type_snd_dur[me_enemy_type_id]=clipboard_enemy_type_snd_dur;
+   		  set_enemy_type_snd_pitch[me_enemy_type_id]=clipboard_enemy_type_snd_pitch;
+   		  set_enemy_type_snd_rand[me_enemy_type_id]=clipboard_enemy_type_snd_rand;
+  		  set_enemy_type_death_snd_dur[me_enemy_type_id]=clipboard_enemy_type_death_snd_dur;
+  		  set_enemy_type_death_snd_pitch[me_enemy_type_id]=clipboard_enemy_type_death_snd_pitch;
+  		  set_enemy_type_death_snd_rand[me_enemy_type_id]=clipboard_enemy_type_death_snd_rand;
+  		  set_enemy_type_tbt_rare[me_enemy_type_id]=clipboard_enemy_type_tbt_rare;
+  		  set_enemy_type_tbt_length[me_enemy_type_id]=set_enemy_type_tbt_length;
+  		  set_enemy_type_tyrant_immune[me_enemy_type_id]=clipboard_enemy_type_tyrant_immune;
+		  break;
+              }
+              break;
+	    case CH_CTRLS:
+    	      WriteToSave1(LOADED_MAP_NAME,DEFAULT_EXTENSION);
+              break;
+            case CH_ESC:
+              if (left_click_hold_timer==0 && typing_timer==0) {
+    	        WriteToSave1(LOADED_MAP_NAME,DEFAULT_EXTENSION);
+		JoinMapSelector(Here,animation_menu_sec,ms_select_option,mse_type,0);
+		Exit;
+              }
+              break;              
+            case CH_SHIFT_ESC:
+              if (right_click_hold_timer==0 && typing_timer==0) {
+  		PopUpOk(MStrPrint("\n\n$FG,2$Changes to Map$FG$ $FG,0$\"%s\"$FG$$FG,4$ $BK,1$Aborted$FG$$BK,0$$FG,2$!$FG$\n$FG$",LOADED_MAP_NAME));
+		JoinMapSelector(Here,animation_menu_sec,ms_select_option,mse_type,0);
+		Exit;
+              }
+              break;
+	    case '?':
+	      if (open_help) {
+		open_help=FALSE;
+              } else {
+		open_help=TRUE;
+	      }
+	      break;
+            case 'z':
+              set_x1=TRUE;
+              set_x2=FALSE;
+              set_x3=FALSE;
+              break;
+            case 'x':
+              set_x1=TRUE;
+              set_x2=FALSE;
+              set_x3=FALSE;
+              break;
+            case 9: //Tab
+	      select_attribute=0;
+              select_option=LimitValue(select_option+1,0,MAX_MODE_NUM);
+              break;
+          }
+          break;
+      }
+    }
+exit_map_editor:
+  } catch
+    PutExcept;
+  SettingsPop;
+  MenuPop;
+  //Correct version end
+  } else { //incorrect version
+    WrongVersionAct;
+    JoinMapSelector(Here,animation_menu_sec,LOADED_MAP_ID,mse_type,-1);
+    Exit;
+  }
+}
+
+BugGameMapMaker;

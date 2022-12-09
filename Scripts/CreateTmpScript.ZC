@@ -1,0 +1,11 @@
+
+U0 MakeTmpScript()
+{
+  U8 *m=MStrPrint("ScriptTmp.%s",DEFAULT_EXTENSION);
+  CDoc *doc=DocNew(m);
+  DocPrint(doc,"%s",ScriptTxt);
+  DocWrite(doc);
+  DocDel(doc);
+}
+
+MakeTmpScript;

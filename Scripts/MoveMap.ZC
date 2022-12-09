@@ -1,0 +1,14 @@
+
+if (!IS_SWAP && !IS_MOVE) {
+  WriteMapToSlot(NAME,select_option,LOADED_MAP_NAME,BEST_SCORE,ScriptTxt,DEFAULT_EXTENSION,TRUE);
+} else {
+  if (IS_SWAP) {
+    WriteMapToSlot(SWAP_NAME,SWAP_OPTION,SWAP_MAP_NAME,SWAP_BEST_SCORE,ScriptTxt,DEFAULT_EXTENSION,TRUE);
+  } else if (IS_MOVE) {//delete
+    RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesLevels/slot_%d",SWAP_OPTION),default_level);
+    RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d",SWAP_OPTION),default_level_script);
+    RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesNames/slot_%d",SWAP_OPTION),"U8 *slot_map_name=\" \";\n");
+    RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesScores/slot_%d",SWAP_OPTION),"F64 best_score=9999;\n");
+  } 
+}
+

@@ -1,0 +1,228 @@
+
+Cd(Here);;
+
+#include "Scripts/MapListing"
+#include "Scripts/JoinMapSelector"
+I64 map_count=GetMapAmount(SAVES_CHALLENGES,DEFAULT_EXTENSION);
+U8 *map_list[map_count];
+SetMapList(SAVES_CHALLENGES,DEFAULT_EXTENSION,map_list);
+
+#include "Pages/Game/Draw/AniGameMainMenu"
+#include "Scripts/StartSnd"
+#include "Scripts/RegRelated"
+#include "Scripts/DrawTips"
+
+#define MAX_MAP_NUM  10
+F64 best_score_arr[MAX_MAP_NUM];
+
+
+U0 RegDftChalInit()
+{
+  I64 i;
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    RegDefault(MStrPrint("TempleOS/Insecticide/SavesChallenges/slot_%d",i),"F64 best_score=9999;\n");
+  }
+}
+
+RegDftChalInit;
+//set best score array (RegExe doesnt work within functions)
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_0");
+best_score_arr[0]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_1");
+best_score_arr[1]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_2");
+best_score_arr[2]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_3");
+best_score_arr[3]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_4");
+best_score_arr[4]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_5");
+best_score_arr[5]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_6");
+best_score_arr[6]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_7");
+best_score_arr[7]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_8");
+best_score_arr[8]=best_score;
+RegExe("TempleOS/Insecticide/SavesChallenges/slot_9");
+best_score_arr[9]=best_score;
+
+U0 ChangePage(I64 page)
+{
+  CTask *user1;
+  user1=User;
+  XTalk(user1,MStrPrint("Cd(\"%s\");\n",Here));
+  XTalk(user1,"DocClear;\n");
+  XTalk(user1,"#include \"Here\";\n");
+  XTalk(user1,"#include \"Scripts/Common\";\n");
+  XTalk(user1,MStrPrint("I64 animation_menu_sec=%d;\n",animation_menu_sec));
+  XTalk(user1,MStrPrint("I64 mse_type=%d;\n",mse_type));
+  switch (page) {
+    case 0: //select game type
+      XTalk(user1,"#include \"Pages/MenuChooseGame\";\n");
+      break;
+    case 1://Gameplay
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultLevelScript\";\n");
+      XTalk(user1,MStrPrint("#include \"%s/%s\";\n",SAVES_CHALLENGES,map_list[select_option]));
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/SavesChallenges/slot_%d\");\n",select_option));
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,MStrPrint("I64 ms_select_option=%d;",select_option));
+      //--------------
+      XTalk(user1,"#include \"Scripts/DefaultGameInclude\";\n");
+      //Level Script
+      if (!FileFind(MStrPrint("LevelScripts/SavesChallenges/%s.%s",map_list[select_option],DEFAULT_EXTENSION))) {//Script doesnt exist
+        XTalk(user1,MStrPrint("Copy(\"Scripts/DefaultLevelScript.%s\",\"LevelScripts/SavesChallenges/%s.%s\");\n",DEFAULT_EXTENSION,map_list[select_option],DEFAULT_EXTENSION));
+      }
+      XTalk(user1,MStrPrint("#include \"LevelScripts/SavesChallenges/%s\";\n",map_list[select_option])); 
+      //--------------
+      XTalk(user1,"#include \"Pages/Game/BugGame\";\n");
+      break;
+    case 2:
+      XTalk(user1,MStrPrint("I64 select_option=%d;",select_option));
+      RegWrite(MStrPrint("TempleOS/Insecticide/SavesChallenges/slot_%d",select_option),
+	       MStrPrint("F64 best_score=%5.4f;\n",DEFAULT_BEST_SCORE));
+      XTalk(user1,"#include \"Pages/MapSelectChal\";\n");
+      break;
+    case 3://tutorial
+      XTalk(user1,"mse_type+=10;\n");
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultLevelScript\";\n");
+      XTalk(user1,"#include \"Scripts/tutorial_LVL\";\n");//saves
+      XTalk(user1,"RegDefault(\"TempleOS/Insecticide/Tutorial\",\"F64 best_score=9999;\\n\");\n");
+      XTalk(user1,"RegExe(\"TempleOS/Insecticide/Tutorial\");\n");//score
+      XTalk(user1,"I64 LOADED_MAP_ID=0;\n");
+      XTalk(user1,"I64 ms_select_option=0;\n");
+      //--------------
+      XTalk(user1,"#include \"Scripts/DefaultGameInclude\";\n");
+      XTalk(user1,"#include \"Scripts/tutorial_LVL_Script\";\n"); 
+      //--------------
+      XTalk(user1,"#include \"Pages/Game/BugGame\";\n");
+      break;
+  }
+}
+
+
+U0 DrawMapSelector(CTask *task,CDC *dc)
+{
+  I64 i,q=8*13;
+  dc->color=BLACK;
+  GrRect(dc,0,0,GR_WIDTH,GR_HEIGHT);
+  DrawAnimation(task,dc,CENTER_LENGTH,CENTER_HEIGHT);
+  dc->color=WHITE;
+  GrPrint(dc,0,0,"%s",game_title);
+  GrPrint(dc,0,16,"Challenges");
+  dc->color=LTCYAN;
+  GrPrint(dc,0,32,
+"
+*[UP]:		 Go up the list
+*[DOWN]:	 Go down the list
+*[SHIFT_R]:	 Reset Score of Selected Map
+*[SHIFT_ESC]:	 Leave
+");
+  Highlight(Blink,CYAN,LTCYAN,dc);
+  GrPrint(dc,0,32+8*4,"
+*['?']:		 Tutorial");  
+  dc->color=YELLOW;
+  GrPrint(dc,0,q-10,"  Challenges		Best Score");  
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    Highlight(i==select_option,LTGREEN,DKGRAY,dc);
+    GrPrint(dc,0,q+8*i,"-");
+  }
+  if (map_count>0) {
+    for (i=0;i<map_count;i++) {
+      Highlight(i==select_option,LTGREEN,DKGRAY,dc);
+      GrPrint(dc,0,q+8*i,"  [%s]",map_list[i]);
+      Highlight(i==select_option,LTGREEN,GREEN,dc);
+      GrPrint(dc,0,q+8*i,"  			%5.4f",best_score_arr[i]);
+    }
+    dc->color=LTGREEN;
+    GrPrint(dc,4,q+8*select_option,">");
+  } else { //No Maps
+    dc->color=WHITE;
+    GrPrint(dc,0,q,"No Challenges Available.");
+  }
+  Highlight(Blink,DKGRAY,YELLOW,dc);
+  GrPrint(dc,0,q+8*MAX_MAP_NUM+8*1,"
+*[ENTER]: Play
+");
+  DrawTips(task,dc,0,GR_HEIGHT/2+8*20,WHITE);
+}
+
+U0 BugGameMapSelectChal()
+{
+  U8 *txt;
+  I64 arg1,arg2;
+  SettingsPush;
+  AutoComplete;
+  WinBorder;
+  WinMax;
+  DocCursor;
+  DocClear;
+  GrPaletteSet(gr32_palette_std);
+  Fs->draw_it=&DrawMapSelector;
+  CTask *animate_background,*animate_snd,*user1;
+  animate_background=Fs->animate_task=Spawn(&AnimateMenu,NULL,"Task",,Fs);
+  animate_snd=Fs->animate_task=Spawn(&AnimateStartSnd,NULL,"Task",,Fs);
+  try {
+    while (TRUE) {
+      switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+        case MESSAGE_KEY_DOWN:
+          switch (arg1) {
+            case 0:
+              switch (arg2.u8[0]) {
+                case SC_CURSOR_UP:
+		  select_option=LimitValue(select_option-1,0,map_count);
+                  break;
+                case SC_CURSOR_DOWN:                  
+		  select_option=LimitValue(select_option+1,0,map_count);
+                  break;
+              }
+              break;
+          }
+          break;
+        case MESSAGE_KEY_UP:
+          switch (arg1) {
+            case CH_ESC: //Abort
+            case CH_SHIFT_ESC:
+              ChangePage(0);
+	      Kill(animate_background);
+              Kill(animate_snd);
+	      Exit;
+              break;
+	    case '\n':
+              if (map_count>0) {
+	        ChangePage(1);
+	        Kill(animate_background);
+	        Kill(animate_snd);
+	        Exit;
+	      }
+	      break;
+	     case 'R':
+	       if (map_count>0) {
+	        ChangePage(2);
+	        Kill(animate_background);
+	        Kill(animate_snd);
+	        Exit;
+	       }
+	       break;
+	    case '?':
+              ChangePage(3);
+	      Kill(animate_background);
+              Kill(animate_snd);
+	      Exit;
+	      break;
+	  }
+      }
+    }  
+exit_map_selector:
+  } catch
+    PutExcept;
+  SettingsPop;
+  Kill(animate_background);
+  Kill(animate_snd);
+  Exit;
+  MenuPop;
+}
+
+BugGameMapSelectChal;

@@ -1,0 +1,59 @@
+
+I64 GetFileAmount(U8 *dirname)
+{
+  I64 file_amount=0;
+  U8 *st;
+  CDirEntry *tmpde;
+  dirname=StrNew(dirname);
+  st=MStrPrint("%s/*.ZC.Z",dirname);
+  tmpde=FilesFind(st);
+  Free(st);
+  Free(dirname);
+  while (tmpde) {
+    st=StrNew(tmpde->name);
+    FileExtRemove(st);
+    tmpde=tmpde->next;
+    file_amount++;
+  }
+  return file_amount;
+}
+
+U0 SetDirList(U8 *dirname, U8 **arr)
+{
+  I64 i=0;
+  U8 *st,*map;
+  CDirEntry *tmpde;
+  dirname=StrNew(dirname);
+  st=MStrPrint("%s/*.ZC.Z",dirname);
+  tmpde=FilesFind(st);
+  Free(st);
+  Free(dirname);
+  while (tmpde) {
+    st=StrNew(tmpde->name);
+    FileExtRemove(st);
+    map=MStrPrint("%s",st);
+    arr[i]=map;
+    i++;
+    tmpde=tmpde->next;
+  }
+}
+
+//------------------------------------------------------
+I64 file_amount=100;
+U0 ConvertTreeToTxt2(U8 *dir,U8 **dir_list,I64 cnt)
+{
+  I64 i;
+  for (i=0;i<cnt;i++) {
+    Copy(MStrPrint("%s/%s.ZC.Z",dir,dir_list[i]),MStrPrint("%s/%s.TXT",dir,dir_list[i]));
+    Del(MStrPrint("%s/%s.ZC.Z*",dir,dir_list[i]));
+  }
+}
+
+U0 ConvertTreeToTxt(U8 *dir)
+{
+  file_amount=GetFileAmount(dir);
+  U8 **dir_list[file_amount];
+  "Files Found: %d\n",file_amount;
+  SetDirList(dir,dir_list);
+  ConvertTreeToTxt2(dir,dir_list,file_amount);
+}

@@ -1,0 +1,9 @@
+
+//example
+//U8 *ScriptTxt="\n//Write a script to make the map more spicy\n//This runs before the game script\n\nU0 AnimateTaskLS0(I64)\n{\n /* while (TRUE) {\n    //Insert code here\n    //player_color=LimitValue(player_color+1,0,16); //player rainbow color\n    Sleep(6);\n  }*/\n}\n\n\nU0 DrawItLS(CTask *,CDC *dc)\n{\n  //Insert code here\n  //dc->color=RED; //Draws a Red Circle at the center\n  //GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,50,50);\n}\n\n#define TASK_NUM\t1\nCTask **ls_arr[TASK_NUM];\n\nU0 KillLS()\n{\n  //Insert Tasks here\n  I64 i;\n  for (i=0;i<TASK_NUM;i++) {\n    Kill(ls_arr[i]);\n  }\n}\n\nU0 RunLS()\n{\n//Insert Tasks here\n  CTask *animate_task_ls0=Fs->animate_task=Spawn(&AnimateTaskLS0,NULL,\"AnimateLS0\",,Fs);\n//CTask *animate_task_ls1=Fs->animate_task=Spawn(&AnimateTaskLS,NULL,\"AniamteLS1\",,Fs);\n  ls_arr[0]=animate_task_ls0;\n//ls_arr[1]=animate_task_ls1;\n}\n\nU0 InitLS()\n{\n//Insert Init here\n}\n";
+$ID,-2$
+//example 2.0
+RegExe("TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_0");
+
+//Print "unwrapped" ScriptTxt
+"%s",ScriptTxt;

@@ -1,0 +1,119 @@
+
+U0 WriteMapToSlot(U8 *name,I64 slot,U8 *map_name,F64 score,U8 *ScriptInput,U8 *extension,Bool trigger_reg_write)
+{
+  I64 o,j;
+  F64 num;
+  Bool is_x;
+  DirMake("Tmp");
+  U8 *m=MStrPrint("Tmp/%s.%s",name,extension);
+  CDoc *doc=DocNew(m);
+  DocPrint(doc,"U8 *load_map_txt=\"\n");
+//Start
+  DocPrint(doc,"#define GROUND_NUM %d\n",GROUND_NUM);
+  DocPrint(doc,"#define ENEMY_NUM %d\n",ENEMY_NUM);
+  DocPrint(doc,"#define MAP_WIDTH %d\n",MAP_WIDTH);
+  DocPrint(doc,"#define MAP_HEIGHT %d\n",MAP_HEIGHT);
+  for (o=0;o<GROUND_F64_ATTRIBUTES_NUM;o++) { //Write saved grounds
+    if (o%2==0) {
+      is_x=TRUE;
+    } else {
+      is_x=FALSE;
+    }
+    DocPrint(doc,"F64 saved_ground_%s[GROUND_NUM]={%1.0f",int_ground_str_li[o],super_saved_ground_f64_arr[o][0]);
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",%1.0f",super_saved_ground_f64_arr[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  DocPrint(doc,"Bool saved_ground_is_ghost[GROUND_NUM]={%d",saved_ground_is_ghost[0]);
+  for (j=1;j<GROUND_NUM;j++) {
+    DocPrint(doc,",%d",saved_ground_is_ghost[j]);
+  }
+  DocPrint(doc,"};\n");
+  for (o=0;o<GROUND_I64_ATTRIBUTES_NUM;o++) {//Write ground I64
+    DocPrint(doc,"I64 saved_ground_%s[GROUND_NUM]={%d",
+	int_ground_str_li[GROUND_F64_ATTRIBUTES_NUM+GROUND_BOOL_ATTRIBUTES_NUM+o],
+	super_saved_ground_i64_arr[o][0]);
+    for (j=1;j<GROUND_NUM;j++) {
+      DocPrint(doc,",%d",super_saved_ground_i64_arr[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+ //Write ground Text
+  DocPrint(doc,"U8 *saved_ground_text[GROUND_NUM]={\\\"%s\\\"",saved_ground_text[0]);
+  for (j=1;j<GROUND_NUM;j++) {
+    DocPrint(doc,",\\\"%s\\\"",saved_ground_text[j]);
+  }
+  DocPrint(doc,"};\n");
+  //Enemy Type
+  DocPrint(doc,"I64 saved_enemy_type[ENEMY_NUM]={%d",saved_enemy_type[0]);
+  for (o=1;o<ENEMY_NUM;o++) {
+    DocPrint(doc,",%d",saved_enemy_type[o]);
+  }
+  DocPrint(doc,"};\n");
+  //Enemy F64 (main)
+  for (o=0;o<ENEMY_F64_ATTRIBUTES_NUM-2;o++) { //Enemies F64 (axis)
+    if (o<2) {//if axis
+      if (o==0) {
+        is_x=TRUE;
+      } else {
+        is_x=FALSE;
+      }
+      num=super_saved_enemy_f64_attributes[o][0];
+    }
+    DocPrint(doc,"F64 saved_enemy_%s[ENEMY_NUM]={%1.0f",enemy_f64_attr_str_li[o],num);
+    for (j=1;j<ENEMY_NUM;j++) {
+      num=super_saved_enemy_f64_attributes[o][j];
+      DocPrint(doc,",%1.0f",num);
+    }
+    DocPrint(doc,"};\n");
+  }
+//type
+  for (o=0;o<ENEMY_$ER$F64_ATTRIBUTES_NUM-2;o++) {
+    DocPrint(doc,"F64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%1.1f",enemy_f64_attr_str_li[o+2],super_saved_enemy_type_f64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%1.1f",super_saved_enemy_type_f64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_$ER$I64_ATTRIBUTES_NUM;o++) {
+    DocPrint(doc,"I64 saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_i64_attr_str_li[o],super_saved_enemy_type_i64_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_saved_enemy_type_i64_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  for (o=0;o<ENEMY_$ER$BOOL_ATTRIBUTES_NUM;o++) {
+    DocPrint(doc,"Bool saved_enemy_type_%s[ENEMY_TYPE_NUM]={%d",enemy_bool_attr_str_li[o],super_saved_enemy_type_bool_attributes[o][0]);
+    for (j=1;j<ENEMY_TYPE_NUM;j++) {
+      DocPrint(doc,",%d",super_saved_enemy_type_bool_attributes[o][j]);
+    }
+    DocPrint(doc,"};\n");
+  }
+  DocPrint(doc,"F64 saved_player_x=%1.0f,saved_player_y=%1.0f;\n",saved_player_x,saved_player_y);
+//Map
+  DocPrint(doc,"I64 map_background=%d;\n",map_background);
+//new
+  DocPrint(doc,"I64 custom_map_background_color=%d;\n",custom_map_background_color);
+  DocPrint(doc,"Bool is_inverted=%d;\n",is_inverted);
+  DocPrint(doc,"F64 saved_fb_x1=%5.4f,saved_fb_y1=%5.4f,saved_fb_x2=%5.4f,saved_fb_y2=%5.4f;\n",
+		saved_fb_x1,saved_fb_y1,saved_fb_x2,saved_fb_y2);
+  DocPrint(doc,"I64 gamemode=%d;\n",gamemode);
+  DocPrint(doc,"U8 *goal_text=\\\"%s\\\";\n",goal_text);
+//Version
+  DocPrint(doc,"F64 version=%1.3f;\n",CURRENT_VERSION);
+//End
+  DocPrint(doc,"\";\n");
+  if (trigger_reg_write) {
+    DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\",load_map_txt);\n",slot));
+    DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\",\n",slot));
+    DocPrint(doc,"\"U8 *ScriptTxt=\\\"%%Q\\\";");
+    DocPrint(doc,"\n\",\"%Q\");\n",ScriptInput);
+    DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesNames/slot_%d\",
+                                     \"U8 *slot_map_name=\\\"%s\\\";\n\");\n",slot,map_name));
+    DocPrint(doc,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesScores/slot_%d\",
+                                     \"F64 best_score=%5.4f;\n\");\n",slot,score));
+  }
+  DocWrite(doc);
+  DocDel(doc);
+}

@@ -1,0 +1,87 @@
+
+//Imports from T:/
+
+I64 GetTDrvType()
+{
+  CDrive *dv;
+  CBlkDev *bd;
+  I64 drv_let,attr;
+  dv=blkdev.drvs;
+  dv+=19; //T
+  if (dv->drive_signature==DRIVE_SIGNATURE_VAL) {
+    drv_let=Drive2Letter(dv);
+    attr=DriveTextAttrGet(drv_let);
+    return dv->fs_type&FSG_TYPE_MASK,bd->type; //REDSEA == 1
+  }
+}
+
+Bool ImportMap(U8 *extension)
+{
+  U8 **import_map_arr[1],*import_map_name="";
+  Bool FROM_ZEAL=FileFind("T:/From_Zeal");
+  if (!FROM_ZEAL) {
+    SetMapList("T:/",extension,import_map_arr);
+  } else {
+    SetMapList("T:/","TXT",import_map_arr);
+  }
+  import_map_name=import_map_arr[0];
+  Cd(__DIR__);;
+  Cd("..");;
+  if (FROM_ZEAL) {//From ZEAL
+    DirMake("ImportTmp");
+    Copy(MStrPrint("T:/%s.TXT",import_map_name),
+	 MStrPrint("ImportTmp/%s.%s",import_map_name,extension));
+    if (FileFind("T:/LevelScripts")) {//If there is a script
+      DirMake("ImportTmp/Script");
+      Copy(MStrPrint("T:/LevelScripts/%s.TXT",import_map_name),
+	   MStrPrint("ImportTmp/Script/%s.%s",import_map_name,extension));      
+    }
+  }
+  CTask *user_tmp;
+  user_tmp=User;
+  XTalk(user_tmp,MStrPrint("Cd(\"%s\");\n",Here));
+  XTalk(user_tmp,"DocClear;\n");
+  XTalk(user_tmp,"#include \"Here\";\n");
+  XTalk(user_tmp,"#include \"Scripts/Common\";\n");
+  XTalk(user_tmp,"#include \"Scripts/DefaultMapFormat\";\n");
+  if (!FROM_ZEAL) {//From TOS
+    XTalk(user_tmp,MStrPrint("#include \"T:/%s.%s\";\n",import_map_name,extension)); //Include HC.Z or ZC
+  } else {//From ZEAL
+    XTalk(user_tmp,MStrPrint("#include \"ImportTmp/%s.%s\";\n",import_map_name,extension)); //Include HC.Z or ZC
+  }
+  XTalk(user_tmp,"#include \"Scripts/DefineClassValues\";\n");
+  XTalk(user_tmp,"#include \"Scripts/SuperSaves\";\n");      
+  XTalk(user_tmp,"#include \"Scripts/WriteMapToSlot\";\n");
+  XTalk(user_tmp,"#include \"Scripts/RegRelated\";\n");
+  XTalk(user_tmp,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",import_map_name));
+  XTalk(user_tmp,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+  XTalk(user_tmp,"WriteMapToSlot(\"ImportMap\",LOADED_MAP_ID,LOADED_MAP_NAME,9999,default_level_script,DEFAULT_EXTENSION,TRUE);\n");
+  XTalk(user_tmp,"#include \"Tmp/ImportMap\";\n");
+  if (FileFind("T:/LevelScripts")) {//If there is a script
+    if (!FROM_ZEAL) {
+      XTalk(user_tmp,MStrPrint("#include \"T:/LevelScripts/%s.%s\";\n",import_map_name,extension)); //Include HC.Z or ZC
+    } else {
+      XTalk(user_tmp,MStrPrint("#include \"ImportTmp/Script/%s.%s\";\n",import_map_name,extension)); //Include HC.Z or ZC
+    }
+    XTalk(user_tmp,MStrPrint("RegWrite(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\",\n",select_option));
+    XTalk(user_tmp,"\"U8 *ScriptTxt=\\\"%%Q\\\";");
+    XTalk(user_tmp,"\n\",exported_script_txt);\n");
+  }
+  XTalk(user_tmp,"Exit;\n");
+  PopUpOk(MStrPrint("$FG,2$\n\nMap $FG$$FG,0$\"%s\"$FG$$FG,3$ $BK,1$Imported$FG$$BK,0$$FG,2$!$FG$\n$FG$",import_map_name));
+  return TRUE;
+}
+
+Bool ImportMapFromT(U8 *extension)
+{
+  if (GetTDrvType==1) { //if REDSEA
+    if (Cd("T:/Insecticide_Verify")) { //If File Found
+      return ImportMap(extension);
+    } else {//Wrong disk
+      PopUpOk("\n$BK,1$$FG,4$!$BK,0$ Contents in current Drive('T') doesn't belong here $BK,1$!$BK,0$$FG$\n");
+    }
+  } else {//No Drive present
+    PopUpOk("\n$BK,1$$FG,4$!$BK,0$ Drive('T') is not REDSEA or Drive('T') isn't Mounted $BK,1$!$BK,0$$FG$\n");
+  }
+  return FALSE;
+}

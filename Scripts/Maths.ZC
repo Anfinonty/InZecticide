@@ -1,0 +1,52 @@
+//----------------------------------------
+F64 GetGradient(F64 x1,F64 y1,F64 x2,F64 y2) 
+{
+  // gradient = rise/run, m = (y1-y2)/(x1-x2)
+  return (y2-y1)/(x2-x1);
+}
+
+F64 GetGroundC(F64 x,F64 y,F64 gradient)
+{
+  //y=mx+c, c = y-mx
+  return y-gradient*x; 
+}
+
+F64 GetX(F64 y,F64 gradient,F64 c)
+{
+  return (y-c)/gradient;
+}
+
+F64 GetDistance(F64 x1,F64 y1,F64 x2,F64 y2)
+{
+  F64 dist=Sqrt(Pow(y2-y1,2)+Pow(x2-x1,2));
+  return dist;
+}
+
+F64 GetSinAngle(F64 height,F64 length)
+{
+  return ASin(height/length);
+}
+
+F64 GetCosAngle(F64 vertical_distance,F64 length)
+{
+  return ACos(vertical_distance/length);
+}
+
+F64 GetRotateAngle(F64 x,F64 y) 
+{
+  F64 adj=0,hypo=0,é=0;
+  adj=x;
+  hypo=GetDistance(x,y,0,0);
+  é=ACos(adj/hypo);
+  if (x<0) {
+    if (y<0) {
+      é=pi-é;
+    } else {
+      é=pi+é;
+    }
+  } else if (y<0) {
+    é=2*pi-é;
+  }
+  return é;
+}
+//------------------------------------------------------

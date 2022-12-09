@@ -1,0 +1,42 @@
+
+
+//Steps:
+//WriteMapToSlot
+//Include 
+//Write ExportTmp/Save/<NAME.EXT>
+//Write ExportTmp/Script/<NAME.EXT>
+
+Cd(Here);;
+
+#include "Tmp/SaveMap"
+
+
+U0 WriteExportTmpSave()
+{
+  U8 *m=MStrPrint("ExportTmp/Save/%s.%s",LOADED_MAP_NAME,DEFAULT_EXTENSION);
+  CDoc *doc=DocNew(m);
+  DocPrint(doc,load_map_txt);
+  DocWrite(doc);
+  DocDel(doc);
+}
+
+
+U0 WriteExportTmpSScript()//write script
+{
+  U8 *m=MStrPrint("ExportTmp/Script/%s.%s",LOADED_MAP_NAME,DEFAULT_EXTENSION);
+  CDoc *doc=DocNew(m);
+  DocPrint(doc,"U8 *exported_script_txt=\"\n");
+  DocPrint(doc,"%Q",ScriptTxt);
+  DocPrint(doc,"\n\";\n");
+  DocWrite(doc);
+  DocDel(doc);
+}
+
+
+U0 WriteExportTmp()
+{
+  WriteExportTmpSave;
+  WriteExportTmpSScript;
+}
+
+WriteExportTmp;

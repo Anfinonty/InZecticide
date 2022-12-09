@@ -1,0 +1,568 @@
+
+U0 AnimateTime1(I64)
+{
+  while (TRUE) {
+    if (!game_over) {
+      current_time1+=0.001;
+      tta=tS;
+      tdiff=current_time1-(tta-t0);
+      if (tdiff>0) { //Time correction1
+        current_time1-=0.001;
+        //current_time2-=0.001;
+      } else if (tdiff<0) {
+        current_time1+=0.001;
+        //current_time2+=0.001;
+      }
+    }
+    Sleep(1);
+  }
+}
+
+U0 AnimateTime2(I64)
+{
+  I64 time;
+  while (TRUE) {
+    if (!game_over) {
+      if (!the_bravery_tyrant) {
+        if (!rst_speed_break) {//time not slowed
+          time=1;
+        } else { //speed breaker
+          time=sleep_timer/2;
+        }
+      } else {
+	time=999;
+      }
+      current_time2+=0.001;
+      if (tdiff>0) { //Time correction 2
+        current_time2-=0.001;
+      } else if (tdiff<0) {
+        current_time2+=0.001;//printed one
+      }
+    }
+    Sleep(time);
+  }
+}
+
+//U0 WholeGame(I64) {
+
+I64 tbt_tick_divisor=167;
+if (BigResolution) {
+  tbt_tick_divisor=217;  
+}
+
+
+U0 WholeGame() {
+  I64 i=0,n1=0,n2=0;
+ //Player
+ //the bravery tyrant
+  if (the_bravery_tyrant) {
+    Sound;
+    if (sound_on) {
+      if (the_bravery_tyrant_timer%tbt_tick_divisor==0) {
+        n1=10;
+        n2=5;
+      }
+      n1=PlaySound(n1,30,0);
+      n2=PlaySound(n2,120,0);
+    }
+    the_bravery_tyrant_timer++;
+    if (screen_shake) {
+      if (the_bravery_tyrant_timer<15 ||
+         the_bravery_tyrant_max-15<=the_bravery_tyrant_timer<=the_bravery_tyrant_max) {
+        cam_move_x=RandNum(-400,400);
+	cam_move_y=RandNum(-50,50);
+      }
+      if (the_bravery_tyrant_timer==15 || the_bravery_tyrant_timer==the_bravery_tyrant_max) {
+	cam_move_x=0;
+  	cam_move_y=0;
+      }
+    }
+    if (the_bravery_tyrant_timer==the_bravery_tyrant_max) {//750 = 5 secs
+      the_bravery_tyrant_timer=0;
+      the_bravery_tyrant=FALSE;
+      //sprite multi
+      cpsm_max=5;
+      for (i=0;i<PSM_NUM;i++) {
+        PSM[i].sprite_x=PSM[i].x+cam_x-PLAYER_WIDTH/2;
+        PSM[i].sprite_y=PSM[i].y+cam_y-PLAYER_HEIGHT/2;
+        PSM[i].appear_timer=0;   
+      }
+      //
+      player_speed_breaker_units=0;
+      if (sound_on) {
+	Noise(10,30,0);
+	Noise(100,100,0);
+      }
+      if (IsInvertedBackground) {
+  	GrPaletteSet(game_gr_palette_dark);
+      } else {
+  	GrPaletteSet(gr32_palette_std);
+      }
+    }
+  }
+  if (!the_bravery_tyrant) {
+    BackgroundAct(map_background);     
+   //performance
+    if (performance_txt_timer>0) {
+      performance_txt_timer--;
+    } else {
+      for (i=0;i<COMBO_NUM;i++) {
+	if (combo_timer[i]==-1) {
+	  performance_grade_arr[i]=-1;
+	}
+      }
+      performance_type=-1;
+    }
+  }
+  GroundAct;
+  if (!game_over) { //While game isn't over
+    PlayerAct;
+ //Enemy
+    for (i=0;i<rendered_enemy_num;i++) {
+      EnemyAct(render_enemies[i]);
+    }
+  } else if (restart_timer<1) {
+    restart_timer++;
+  }
+  if (player_health>0) {//player alive
+    switch (gamemode) {//gamemode
+      case 0:
+	if (enemy_kills==ENEMY_NUM) {
+	  win=TRUE;
+	}
+	break;
+      case 1:
+        if (fb_x1<player_x<fb_x2) {
+	  if (fb_y2<player_y<fb_y1 || fb_y1<player_y<fb_y2) {
+            win=TRUE;
+	  }
+        }
+	break;
+    }
+  } else { //player dies
+    game_over=TRUE;
+  }
+  if (win) {
+    game_over=TRUE;
+  }
+  if (game_over) {
+    if (!beep_once) {
+      Beep;
+    }
+    beep_once=TRUE;
+  }
+  //Yield; 
+}
+
+U0 AnimateTask(I64)
+{
+  while (TRUE) {
+//    JobQueue(&WholeGame,NULL,mp_count-1,0);
+    WholeGame;
+    Sleep(sleep_timer);
+  }
+}
+
+//U0 Init(I64)
+U0 Init()
+{
+  I64 i;
+  Sound;
+  if (IsInvertedBackground) {
+    GrPaletteSet(game_gr_palette_dark);
+  } else {
+    GrPaletteSet(gr32_palette_std);
+  }
+  t0=tS;
+  the_bravery_tyrant_timer=0;
+  souls_taken=0;
+  current_time1=0;
+  current_time2=0;
+  restart_timer=0;
+//
+  for (i=0;i<COMBO_NUM;i++) {
+    combo_timer[i]=-1;
+    combo_streak[i]=0;
+    performance_grade_arr[i]=-1;
+  }
+  performance_type=-1;
+  performance_txt_timer=0;
+//
+  player_speed_breaker_recharge_minus=0; 
+  player_hit_cooldown_timer=0;
+  game_rating_timer=0;
+//
+  beep_once=FALSE;
+  game_over=FALSE;
+  win=FALSE;
+  celebrate=FALSE;
+  the_bravery_tyrant=FALSE;
+//
+  cam_move_x=0;
+  cam_move_y=0;
+//The Rest
+  GridInit;
+  NodeGridInit;
+  GroundInit;
+  BulletInit;
+  EnemyInit;
+  NodeGridAttributesInit;
+  BackgroundInit;
+  PlayerInit;
+  GroundInit2;
+  player_color=saved_player_color;
+  //finishbox Init
+  fb_x1=saved_fb_x1;
+  fb_y1=saved_fb_y1;
+  fb_x2=saved_fb_x2;
+  fb_y2=saved_fb_y2;
+//  Yield; 
+}
+
+U0 DrawIt(CTask *task,CDC *dc)
+{
+  I64 w=task->pix_width,
+      h=task->pix_height,i;
+  DrawBackground(task,dc,map_background,custom_map_background_color);
+  DrawGroundTriFill(task,dc);
+  if (is_draw_grid) {
+    DrawGrid(task,dc);   //limited
+  }
+  //Screen flash dmg (lag in excess)
+  if (!game_over) {
+    if (damage_flash) {
+      if (player_hit_cooldown_timer>=96) {
+        i=RandNum(0,2);
+        switch (i) {
+          case 0:
+	    i=RED;
+	    break;
+          case 1:
+	    i=LTRED;
+	    break;
+          case 2:
+	    i=WHITE;
+	    break;
+        }
+        dc->color=i;
+        GrRect(dc,0,0,GR_WIDTH,GR_HEIGHT);
+      }
+    }
+  }
+  //DrawGroundMulti(task,dc);
+  DrawGround(task,dc); //limited
+  DrawGroundFloodfill(task,dc);
+  DrawGroundText(task,dc);
+  DrawEnemy(task,dc);// limited
+  if (fade_player) {
+    DrawPlayerSpriteMulti(task,dc);
+  }
+  DrawPlayer(task,dc);
+  DrawItLS(task,dc);
+//GUI
+  DrawPlayerGUI(task,dc,game_over,game_help);
+//  DrawFinishBox(task,dc,);
+  if (game_over) {
+    if (current_time2<best_score && win) {//win & new best score
+      best_score=current_time2;
+      celebrate=TRUE;
+    }
+    if (celebrate) {
+      dc->color=LTPURPLE;
+      GrPrint(dc,(w-FONT_WIDTH*9)/2,(h-FONT_HEIGHT)/2,"New Best!");
+      Highlight(Blink,GREEN,LTPURPLE,dc);
+      GrPrint(dc,(w-FONT_WIDTH*9)/2-8*4,(h-FONT_HEIGHT)/2+8,"[SHIFT_ESC]: Exit");
+      GrPrint(dc,(w-FONT_WIDTH*9)/2-8*2,(h-FONT_HEIGHT)/2+16,"[ENTER]: Retry");
+    } else { //lose
+      Highlight(win,GREEN,RED,dc);
+      GrPrint(dc,(w-FONT_WIDTH*9)/2,(h-FONT_HEIGHT)/2,"Game Over");
+      if (win) {
+        Highlight(Blink,GREEN,LTRED,dc);
+      } else {
+	if (!is_zeal) {
+	  if (IsInvertedBackground) {
+            GrPaletteSet(gr32_palette_std);
+	  } else {
+            GrPaletteSet(game_gr_palette_dark);
+          }
+	}
+        Highlight(Blink,RED,LTRED,dc);
+      }
+      GrPrint(dc,(w-FONT_WIDTH*9)/2-8*4,(h-FONT_HEIGHT)/2+16,"[SHIFT_ESC]: Exit");
+      GrPrint(dc,(w-FONT_WIDTH*9)/2-8*2,(h-FONT_HEIGHT)/2+24,"[ENTER]: Retry");
+    }         
+  } else {
+    dc->color=GREEN;
+  }
+  //GrPrint(dc,0,8,"Real Time: %3.2f",tta-t0);
+  //GrPrint(dc,0,16,"Diff:%5.4f",tdiff);
+  switch (gamemode) {
+    case 0:
+      GrPrint(dc,0,0,"Time:%3.2f Best:%3.2f"
+                  ,current_time2,best_score);
+      dc->color=LTRED;
+      GrPrint(dc,0,0,"
+
+Kill all the Enemies");
+      dc->color=RED;
+      GrPrint(dc,0,0,"
+
+
+Enemies Remaining: %d",ENEMY_NUM-enemy_kills);
+      break;
+    case 1:
+      GrPrint(dc,0,0,"Time:%3.2f Best:%3.2f"
+                  ,current_time2,best_score);
+      dc->color=RED;
+      GrPrint(dc,0,8,"%s",goal_text);
+      break;
+  }
+}
+
+
+//#include "Scripts/BugGameSongs"
+
+
+U0 BugGame()
+{
+  I64 arg1,arg2;
+  CTask *time_task1,*time_task2,*song_task,*a_task;
+  AutoComplete;
+  WinBorder;
+  WinMax;
+  DocCursor;
+  DocClear;
+  SettingsPush;
+  if (version==CURRENT_VERSION) {
+  //Correct version
+  I64 saved_fp_draw_ms=gr.fp_draw_mouse;
+  gr.fp_draw_mouse=NULL;
+  Init;
+  Fs->draw_it=&DrawIt;
+  InitLS;
+  PopUpOk("\nHit OKAY to Begin\n");
+  a_task=Fs->animate_task=Spawn(&AnimateTask,NULL,"Task",,Fs);
+  time_task1=Fs->animate_task=Spawn(&AnimateTime1,NULL,"Time1",,Fs);
+  time_task2=Fs->animate_task=Spawn(&AnimateTime2,NULL,"Time2",,Fs);
+  if (music_on) {
+    if (RandNum(0,1)!=1) {//50%
+      song_type=0;
+      song_task=Fs->song_task=Spawn(&SongDefault,NULL,"SongDefault",,Fs);
+    } else {
+      song_type=1;
+      song_task=Fs->song_task=Spawn(&SongBloodSugar,NULL,"SongBloodSugar",,Fs);
+    }
+  }
+  RunLS;
+  try {
+    while (TRUE) {
+      switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+        case MESSAGE_KEY_DOWN:
+          switch (arg1) {
+	    case 0:
+	      switch (arg2.u8[0]) {
+                case SC_CURSOR_LEFT:
+                  rst_left=TRUE;
+                  break;
+                case SC_CURSOR_RIGHT:
+                  rst_right=TRUE;
+                  break;
+                case SC_CURSOR_UP:
+                  rst_up=TRUE;
+                  break;
+                case SC_CURSOR_DOWN:
+                  rst_down=TRUE;
+                  break;
+              }
+	      break;
+	    case CH_ESC:
+	      //ESC
+	      break;
+            case '\n':
+	      if ((!game_over && restart_timer==0) || 
+                  (game_over && restart_timer==1)) {
+		Init;
+		InitLS;
+	      }
+              break;
+	    case game_key_uppercut:
+	      uppercut=TRUE;
+	      break;
+	    case game_key_attack:
+	      player_attack_rst=TRUE;
+	      break;
+            case game_key_sprint:
+	       rst_key_sprint=TRUE;
+               break;
+            case game_key_left:
+               rst_left=TRUE;
+               break;
+            case game_key_right:
+               rst_right=TRUE;
+               break;
+            case game_key_up:
+               rst_up=TRUE;
+               break;
+            case game_key_down:
+               rst_down=TRUE;
+               break;
+	    case '\'':
+	      player_color=LimitValue(player_color+1,0,16);
+	      break;
+          }
+          break;
+        case MESSAGE_KEY_UP:
+          switch (arg1) {
+	    case 0:
+	      switch (arg2.u8[0]) {
+                case SC_CURSOR_LEFT:
+                  rst_left=FALSE;
+                  break;
+                case SC_CURSOR_RIGHT:
+                  rst_right=FALSE;
+                  break;
+                case SC_CURSOR_UP:
+              	  rst_up=FALSE;
+                  break;
+                case SC_CURSOR_DOWN:
+                  rst_down=FALSE;
+                  break;
+              }
+	      break;
+	    case game_key_the_bravery_tyrant:
+	      if (!game_over) {
+	        if (player_speed_breaker_units>=player_speed_breaker_max-2) {
+		  if (sound_on) {
+		    Noise(30,120,0);
+		    Noise(30,100,0);
+		    Noise(10,50,0);
+		  }
+		  player_speed_breaker_units=-10;
+	          the_bravery_tyrant=!the_bravery_tyrant;
+  	          if (IsInvertedBackground) {// night
+    		    GrPaletteSet(gr32_palette_std);
+	          } else {
+    	            GrPaletteSet(game_gr_palette_dark);
+	          }
+	        }
+	      }
+	      break;
+            case CH_SHIFT_ESC:
+               goto bug_game_done;
+               break;
+            case '?':
+	      if (game_help) {
+	        game_help=FALSE;
+              } else {
+	        game_help=TRUE;
+	      }
+	      break;
+	    case game_key_change_web_mode:
+	      player_web_type=LimitValue(player_web_type+1,0,2);
+	      player_lock_web_type=player_web_type;
+	      break;
+	    case game_key_speedbreak:
+	      if (rst_speed_break) {
+	        rst_speed_break=FALSE;
+	      } else {
+	        rst_speed_break=TRUE;
+	      }
+	      break;
+	    case game_key_uppercut:
+	      uppercut=FALSE;
+	      break;
+	    case game_key_attack:
+	      player_attack_rst=FALSE;
+	      player_attack=TRUE;
+	      player_blocking=FALSE;
+	      break;
+	    case game_key_regain_health://regen health
+	      regen_type=0;
+	      souls_taken=PlayerRegen(souls_taken,regen_type,game_over);
+              break;
+	    case game_key_regain_speedbreak://regen speedbreaker
+	      regen_type=1;
+	      souls_taken=PlayerRegen(souls_taken,regen_type,game_over);
+              break;
+	    case game_key_regain_web://regen web
+	      regen_type=2;
+	      souls_taken=PlayerRegen(souls_taken,regen_type,game_over);
+	      break;
+	    case game_key_pickup_web:
+	      destroy_ground=TRUE;
+	      break;
+            case CH_CTRLG:
+	      if (is_draw_grid) {
+	        is_draw_grid=FALSE;
+              } else {
+	        is_draw_grid=TRUE;
+	      }
+	      break;
+            case game_key_sprint:
+	      rst_key_sprint=FALSE;
+              break;
+            case game_key_left:
+              rst_left=FALSE;
+              break;
+            case game_key_right:
+              rst_right=FALSE;
+              break;
+            case game_key_up:
+              rst_up=FALSE;
+              break;
+            case game_key_down:
+              rst_down=FALSE;
+              break;
+            case game_key_toggle_view:
+	      if (!change_view) {
+		change_view=TRUE;
+	      } else {
+		change_view=FALSE;
+	      }
+              break;
+          }
+      }
+    }
+bug_game_done:
+  } catch
+    PutExcept;
+  Kill(time_task1);
+  Kill(time_task2);
+  if (music_on) {
+    Kill(song_task);
+  }
+  Kill(a_task);
+  KillLS;
+  SettingsPop;
+  MenuPop;  
+  switch (mse_type) {
+    case 1:
+      RegWrite(MStrPrint("TempleOS/Insecticide/SavesChallenges/slot_%d",LOADED_MAP_ID),
+	       MStrPrint("F64 best_score=%5.4f;\n",best_score));
+      break;
+    case 2:
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesScores/slot_%d",LOADED_MAP_ID),
+	       MStrPrint("F64 best_score=%5.4f;\n",best_score));
+      break;
+    case 11:
+    case 12:
+      RegWrite("TempleOS/Insecticide/Tutorial",
+	       MStrPrint("F64 best_score=%5.4f;\n",best_score));
+      break;
+  }
+  gr.fp_draw_mouse=saved_fp_draw_ms;
+  if (mse_type<10) {
+    JoinMapSelector(Here,animation_menu_sec,ms_select_option,mse_type,-1);
+  } else {
+    JoinMapSelector(Here,animation_menu_sec,ms_select_option,mse_type-10,-1);
+  }
+  Exit;
+  //Correct version end
+  } else {//Wrong Version
+    WrongVersionAct;
+    JoinMapSelector(Here,animation_menu_sec,LOADED_MAP_ID,mse_type,-1);
+    Exit;
+  }
+}
+
+BugGame;

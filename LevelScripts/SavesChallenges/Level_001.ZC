@@ -1,0 +1,41 @@
+
+//Write a script to make the map more spicy
+//This runs before the game script
+
+U0 AnimateTaskLS0(I64)
+{
+  while (TRUE) {
+    //Insert code here
+    //player_color=LimitValue(player_color+1,0,16); //player rainbow color
+    Sleep(6);
+  }
+}
+
+
+U0 DrawItLS(CTask *,CDC *dc)
+{
+  //Insert code here
+  //dc->color=RED; //Draws a Red Circle at the center
+  //GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,50,50);
+}
+
+#define TASK_NUM	1
+CTask **ls_arr[TASK_NUM];
+
+U0 KillLS()
+{
+  //Insert Tasks here
+  I64 i;
+  for (i=0;i<TASK_NUM;i++) {
+    Kill(ls_arr[i]);
+  }
+}
+
+U0 RunLS()
+{
+//Insert Tasks here
+  CTask *animate_task_ls0=Fs->animate_task=Spawn(&AnimateTaskLS0,NULL,"AnimateTaskLs0",,Fs);
+//CTask *animate_task_ls1=Fs->animate_task=Spawn(&AnimateTaskLS,NULL,"AnimateTaskLs1",,Fs);
+  ls_arr[0]=animate_task_ls0;
+//ls_arr[1]=animate_task_ls1;
+}

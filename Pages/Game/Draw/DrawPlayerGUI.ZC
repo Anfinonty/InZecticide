@@ -1,0 +1,301 @@
+  
+//Web    SpeedBreaker    Souls
+
+$SP,"<1>",BI=1$    $SP,"<2>",BI=2$		$SP,"<3>",BI=3$
+
+
+//multiplier
+$SP,"<4>",BI=4$
+
+
+
+//Uppercut //Dragging
+$SP,"<5>",BI=5$	   $SP,"<6>",BI=6$
+
+
+
+
+
+
+
+
+
+
+U8 **combo_timer_txt[COMBO_NUM]={
+  "Dodge",
+  "Hits",
+  "Kills"
+},
+  *regeneration_doubled_txt="REGENERATION      ",
+  *strength_doubled_txt    ="    STRENGTH      ",
+  *tbt_ready_txt="TIME BREAKER IS READY";
+
+I64 max_stars_arr[COMBO_NUM]={5,5,3};
+
+U0 DrawPlayerGUI(CTask *task,CDC *dc,Bool g_o,Bool help)
+{
+  I64 txt_x,i,j,p=8*24,q=8*25,max_stars=0;//q=height
+  Bool ltpurple_performance=FALSE,strength_performance=FALSE;
+  //Combo TXT Above GUI Box [LIVE]
+  for (i=0;i<COMBO_NUM;i++) {
+    if (combo_timer[i]>0 && combo_streak[i]>0) {
+      dc->color=BLACK;//text
+      GrPrint(dc,0,GR_HEIGHT-8*(12+i)-4,"%s",combo_timer_txt[i]);
+      //blinking star
+      max_stars=combo_streak[i]/max_stars_arr[i];
+      if (max_stars>=max_stars_arr[i]) {
+        max_stars=max_stars_arr[i];
+      }
+      if (Blink && max_stars<max_stars_arr[i]) {
+        GrPrint(dc,8*max_stars,GR_HEIGHT-8*(12+i)-4,"      *");
+      }
+      j=BLACK;
+      switch (performance_grade_arr[i]) {
+	case 0:
+          j=BLUE;
+	  break;
+	case 1:
+	  j=PURPLE;
+	  break;
+	case 2:
+	  j=LTPURPLE;
+	  strength_performance=TRUE;
+	  break;
+	case 3:
+	  j=RandNum(0,15);
+	  strength_performance=TRUE;
+	  break;
+      }
+      dc->color=j;
+      for (j=0;j<max_stars;j++) {//colored star
+        GrPrint(dc,8*j,GR_HEIGHT-8*(12+i)-4,        "      *");
+      }
+      GrPrint(dc,8*max_stars,GR_HEIGHT-8*(12+i)-4,  "         X%d",combo_streak[i]);
+    }
+  }
+//performance txt
+  if (performance_type!=-1) {
+  i=performance_grade_arr[performance_type];
+    if (performance_txt_timer>0 && i!=-1) {
+      if (i<3) {
+        txt_x=GR_WIDTH/2-(StrLen(performance_grade_txt[i])+StrLen(performance_type_txt[performance_type])*8)/2;
+        switch (i) {
+          case 0:
+	    j=BLUE;
+	    break;
+          case 1:
+	    j=PURPLE;
+	    break;
+          case 2:
+	    j=LTPURPLE;
+	    break;
+        }
+        Highlight(Blink,BLACK,j,dc);
+	if (!screen_shake) {
+          GrPrint(dc,txt_x,GR_HEIGHT/6,"%s %s",performance_grade_txt[i],performance_type_txt[performance_type]);
+	} else {
+          GrPrint(dc,txt_x+RandNum(-4*i,4*i),GR_HEIGHT/6+RandNum(-4*i,4*i),"%s %s",performance_grade_txt[i],performance_type_txt[performance_type]);
+	}
+      } else {
+        txt_x=GR_WIDTH/2-(StrLen(over_performance_txt)*8)/2;
+        dc->color=RandNum(0,15);
+	if (!screen_shake) {
+          GrPrint(dc,txt_x,GR_HEIGHT/6,"%s",over_performance_txt);
+	} else {
+          GrPrint(dc,txt_x+RandNum(-15,15),GR_HEIGHT/6+RandNum(-15,15),"%s",over_performance_txt);
+	}
+      }
+    }
+  }
+  I64 tbt_txt_x=GR_WIDTH/2+4-(StrLen(tbt_ready_txt)*8)/2;
+  if (player_speed_breaker_units>=player_speed_breaker_max && !g_o) {
+    Highlight(Blink,CYAN,LTCYAN,dc);
+    GrPrint(dc,cam_move_x+tbt_txt_x,cam_move_y+GR_HEIGHT/6-17,"%s",tbt_ready_txt);
+    Highlight(Blink,LTCYAN,CYAN,dc);
+    GrPrint(dc,cam_move_x+tbt_txt_x,cam_move_y+GR_HEIGHT/6-16,"%s",tbt_ready_txt);
+  }
+  //Gui box
+//right side
+  if (uppercut) {//uppercut
+    dc->color=BLACK;
+    GrPrint(dc,GR_WIDTH-8*10,8*6,"UPPERCUT");
+    Sprite3(dc,GR_WIDTH-8*8,8*6,0,$IB,"<5>",BI=5$);
+  } else {//pull down
+    if ((on_ground_id==-1 || print_current_above) && rst_down) {
+      dc->color=BLACK;
+      GrPrint(dc,GR_WIDTH-8*10,8*6,"BLOCK/\nDRAG INTO");
+      Sprite3(dc,GR_WIDTH-8*8,8*6,0,$IB,"<6>",BI=6$);
+    } else if (print_current_below && rst_up) {
+      dc->color=BLACK;
+      GrPrint(dc,GR_WIDTH-8*10,8*6,"DRAG INTO");
+      Sprite3(dc,GR_WIDTH-8*8,8*6,0,$IB,"<6>",BI=6$);
+    }
+  }
+//default
+  if (!(0<mouse.pos.x<8*20 && GR_HEIGHT-8*11-4<mouse.pos.y-6<GR_HEIGHT)) {
+    dc->color=BLACK;
+    GrRect(dc,0,GR_HEIGHT-8*11-4,8*21,8*11+4);
+    Sprite3(dc,0,GR_HEIGHT-8*10+2,0,$IB,"<3>",BI=3$);
+    Sprite3(dc,0,GR_HEIGHT-8*7+2,0,$IB,"<1>",BI=1$);
+    Sprite3(dc,0,GR_HEIGHT-8*4,0,$IB,"<2>",BI=2$);
+    dc->color=WHITE;
+    GrPrint(dc,22,GR_HEIGHT-8*10+2," Souls:  %d",souls_taken);
+    GrPrint(dc,22,GR_HEIGHT-8*7, " Webs:   %d/%d 
+ Broken: %d",player_max_web_num-placed_web_num,player_max_web_num,cdweb_num);
+//rating
+    if (player_speed_breaker_recharge_minus<(DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN-10)/4) {
+      j=BLUE;
+    } else if (player_speed_breaker_recharge_minus<(DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN-10)*3/4) {
+      j=PURPLE;
+    } else if (player_speed_breaker_recharge_minus<DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN-10) {
+      j=LTPURPLE;
+      strength_performance=
+      ltpurple_performance=TRUE;
+    } else if (player_speed_breaker_recharge_minus<DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN) {
+      j=RandNum(0,15);
+      strength_performance=
+      ltpurple_performance=TRUE;
+    }
+    if (strength_performance) {
+      if (Blink) {
+	dc->color=LTRED;
+        Sprite3(dc,GR_WIDTH-8*6-1,10+1,0,$IB,"<4>",BI=4$);
+        I64 sd_txt_x=StrLen(strength_doubled_txt)*8;
+        dc->color=RED;
+        GrPrint(dc,GR_WIDTH-sd_txt_x-8-1,18-1,"%s",strength_doubled_txt);
+        dc->color=LTRED;
+        GrPrint(dc,GR_WIDTH-sd_txt_x-8,18,"%s",strength_doubled_txt);
+      }
+    }
+    if (ltpurple_performance) {
+      if (Blink) { 
+	dc->color=LTPURPLE;
+        Sprite3(dc,GR_WIDTH-8*6,10,0,$IB,"<4>",BI=4$);
+	I64 rd_txt_x=StrLen(regeneration_doubled_txt)*8;
+        dc->color=PURPLE;
+	GrPrint(dc,GR_WIDTH-rd_txt_x-8-1,8+1,"%s",regeneration_doubled_txt);
+        dc->color=LTPURPLE;
+	GrPrint(dc,GR_WIDTH-rd_txt_x-8,8,"%s",regeneration_doubled_txt);
+      }
+    }
+    DrawProgressBar(task,dc,30,GR_HEIGHT-8*4-4,BLACK,j,2,player_speed_breaker_recharge_minus,DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN-10);
+//speed breaker
+    if (!the_bravery_tyrant) {
+      DrawProgressBar(task,dc,30,GR_HEIGHT-8*4,CYAN,LTCYAN,8,player_speed_breaker_units,player_speed_breaker_max);
+    } else {
+      DrawProgressBar(task,dc,30,GR_HEIGHT-8*4,CYAN,LTCYAN,8,the_bravery_tyrant_max-the_bravery_tyrant_timer,the_bravery_tyrant_max);
+    }
+  }
+  if (player_web_type==0 && on_ground_id!=-1) {
+    Highlight(print_valid_web,LTGREEN,LTRED,dc);
+    GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,DEFAULT_PLAYER_SHORT_BUILD_RANGE*NODE_SIZE);
+    GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,DEFAULT_PLAYER_SHORT_BUILD_RANGE*NODE_SIZE-1);
+    GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,DEFAULT_PLAYER_SHORT_BUILD_RANGE*NODE_SIZE-2);
+    GrCircle(dc,GR_WIDTH/2,GR_HEIGHT/2,DEFAULT_PLAYER_SHORT_BUILD_RANGE*NODE_SIZE-3);
+    if (!(change_view && ((on_ground_timer>8 && print_current_above) ||
+	 (on_ground_timer>0 && print_current_below)))) {
+      GrLine(dc,above_player_x+cam_x-PLAYER_WIDTH/2,above_player_y+cam_y-PLAYER_HEIGHT/2,
+		edge_x+cam_x-PLAYER_WIDTH/2,edge_y+cam_y-PLAYER_HEIGHT/2);
+    }
+  }
+  if (!g_o) {
+    if (!the_bravery_tyrant) {   //Speedbreaker infront of screen
+      if (rst_speed_break && player_speed_breaker_units>0) {
+        Sprite3(dc,GR_WIDTH/2-8*2,GR_HEIGHT/2-8*4,0,$IB,"<7>",BI=7$);
+        DrawProgressBar(task,dc,GR_WIDTH/2-8*16/2,GR_HEIGHT/2-8*2,BLACK,CYAN,2,player_speed_breaker_units,player_speed_breaker_max);
+      }
+    } else {   //The bravery Tyrant speedbreaker
+      if (the_bravery_tyrant_timer<the_bravery_tyrant_max-275 ||
+          (the_bravery_tyrant_timer>=the_bravery_tyrant_max-275 && Blink)) {
+        Sprite3(dc,GR_WIDTH/2-8*2,GR_HEIGHT/2-8*4,0,$IB,"<2>",BI=2$);
+        DrawProgressBar(task,dc,GR_WIDTH/2-8*16/2,GR_HEIGHT/2-8*2,BLACK,CYAN,2,the_bravery_tyrant_max-the_bravery_tyrant_timer,the_bravery_tyrant_max);
+      }
+    }
+  }
+  //Right side controls help
+  if (!help) {
+    dc->color=BLACK;
+    GrRect(dc,GR_WIDTH-p-4,GR_HEIGHT-24,p+4,24);
+    dc->color=WHITE;
+    GrPrint(dc,GR_WIDTH-p,GR_HEIGHT-20,"Press '?' to Open Help");
+  } else {
+    dc->color=BLACK;
+    GrRect(dc,GR_WIDTH-p-4,GR_HEIGHT-q-4,p+4,q+4);
+    dc->color=WHITE;
+    GrPrint(dc,GR_WIDTH-p,GR_HEIGHT-q-4,"
+['%c'/'%c']: Move
+['%c']:     Jump
+['%c']:     Drop Down
+['%c'/'%c']: Block
+['%c']:     Sprint
+['%c']:     Retrieve Web
+['%c']:     Web Type
+[LClk/'%c']:Reaction
+[RClk]:    Shoot/Build
+[CTRL_G]:  Grids
+'%c': Attack
++'%c':Uppercut
++'%c':Drag Enemies Down
++'%c':Drag Enemies Up
+'%c': Soul ¯ Health
+'%c': Soul ¯ Reaction
+'%c': Soul ¯ Webs
+'%c': The Bravery Tyrant
+
+[SHIFT_ESC]: Exit
+[ENTER]:     Restart
+
+Press '?' to Close Help
+",game_key_left,game_key_right,
+  game_key_up,
+  game_key_down,
+  game_key_up,
+  game_key_down,
+  game_key_sprint,
+  game_key_pickup_web,
+  game_key_change_web_mode,
+  game_key_speedbreak,
+  game_key_attack,
+  game_key_uppercut,
+  game_key_down,
+  game_key_up,
+  game_key_regain_health,
+  game_key_regain_speedbreak,
+  game_key_regain_web,
+  game_key_the_bravery_tyrant
+);
+  }
+}
+        ù                  ýÿÿÿ            ûÿÿÿ      øÿÿÿ                            	                  ÿÿÿÿ                     	   
+            	            
+            
+            þÿÿÿ   ûÿÿÿ   ÿÿÿÿ              2               
+	            
+                     Y        	                                                            þÿÿÿ   ûÿÿÿ   þÿÿÿ                     	                     
+         ýÿÿÿ   þÿÿÿ               
+                                 þÿÿÿ   üÿÿÿ   þÿÿÿ      	         
+      
+         
+      
+                       2               
+	            
+                     ô         
+      
+      
+            
+            
+            
+         üÿÿÿ
+   üÿÿÿ   úÿÿÿ
+   úÿÿÿ   üÿÿÿ
+   üÿÿÿ       
+             
+            
+            
+            
+      %      
+%      (              /         ÿ   öÿÿÿ=      L   '   :      öÿÿÿ?      =   !             "   :      I      U         C      N      T         <      K         ÷ÿÿÿ>      4               	      ýÿÿÿ            	         "            %            !   &      "      )   
+                       ÿ   -            öÿÿÿ4      1   4         öÿÿÿ4          $   J      -   öÿÿÿ4      
+         !   
+      )   0   
+   #   üÿÿÿ      $   H   0   <   )   I   8   E   2   N   '   L      P      J      G      I      ?   !   G    

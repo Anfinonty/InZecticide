@@ -1,0 +1,477 @@
+
+Cd(Here);;
+
+#include "Scripts/MapListing"
+#include "Scripts/JoinMapSelector"
+
+I64 choose_map_action=0;
+Bool is_move=FALSE,is_swap=FALSE,is_update=FALSE;
+
+#include "Scripts/RegRelated"
+#include "Scripts/LevelImport"
+#include "Scripts/LevelExport"
+#include "Pages/Game/Draw/AniGameMainMenu"
+#include "Scripts/StartSnd"
+#include "Scripts/DrawTips"
+
+U0 ChangePage(I64 page)
+{
+  CTask *user1;
+  user1=User;
+  XTalk(user1,MStrPrint("Cd(\"%s\");\n",Here));
+  XTalk(user1,"DocClear;\n");
+  XTalk(user1,"#include \"Here\";\n");
+  XTalk(user1,"#include \"Scripts/Common\";\n");
+  XTalk(user1,MStrPrint("I64 animation_menu_sec=%d;\n",animation_menu_sec));
+  XTalk(user1,MStrPrint("I64 mse_type=%d;\n",mse_type));
+  switch (page) {
+    case 0://Gameplay
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultLevelScript\";\n");
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,MStrPrint("I64 ms_select_option=%d;",select_option));
+      //--------------
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesScores/slot_%d\");\n",select_option));
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\");\n",select_option));
+      XTalk(user1,"#include \"Scripts/DefaultGameInclude\";\n");
+      XTalk(user1,"#include \"Scripts/CreateTmpScript\";\n");
+      XTalk(user1,"#include \"ScriptTmp\";\n");      
+      //--------------
+      XTalk(user1,"#include \"Pages/Game/BugGame\";\n");
+      break;
+    case 1://Map edit
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,MStrPrint("I64 ms_select_option=%d;",select_option));
+      //-------------
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+      //-------------
+      XTalk(user1,"#include \"Pages/MapEditor/MapEditor\";\n");
+      break;
+    case 2://Map Settings
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      //-------------
+      XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+      //-------------
+      XTalk(user1,"#include \"Pages/MapSettings\";\n");
+      break;
+    case 3://Create new map
+      XTalk(user1,"I64 map_slot_action=1;\n");
+      XTalk(user1,"U8 *LOADED_MAP_NAME=\"\";\n");
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,"#include \"Pages/MapCreate\";\n");
+      break;
+    /*case 4://Map Update
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,MStrPrint("#include \"%s/%s\";\n",SAVES,map_list[select_option]));
+      XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",map_list[select_option]));
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,"#include \"Pages/UpdateMap\";\n");
+      break;*/
+    case 5: //Back to menu
+      XTalk(user1,"#include \"Pages/MenuChooseGame\";\n");
+      break;
+    case 6://Paste Copy Map or Move or Update
+      //---------
+//
+      XTalk(user1,MStrPrint("I64 select_option=%d;\n",select_option));
+      XTalk(user1,MStrPrint("U8 *NAME=\"MAP1\";\n"));
+      if (!is_update) {
+        XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[copy_level_id_clipboard]));
+        XTalk(user1,MStrPrint("F64 BEST_SCORE=%5.4f;\n",best_score_arr[copy_level_id_clipboard]));
+      } else {
+        XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+        XTalk(user1,MStrPrint("F64 BEST_SCORE=%5.4f;\n",best_score_arr[select_option]));
+      }
+//
+      XTalk(user1,MStrPrint("I64 SWAP_OPTION=%d;\n",copy_level_id_clipboard));
+      XTalk(user1,MStrPrint("U8 *SWAP_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+      XTalk(user1,MStrPrint("U8 *SWAP_NAME=\"MAP2\";\n"));
+      XTalk(user1,MStrPrint("F64 SWAP_BEST_SCORE=%5.4f;\n",best_score_arr[select_option]));
+      //---------
+      if (is_swap || is_move) {
+        XTalk(user1,MStrPrint("I64 copy_level_id_clipboard=%d;\n",select_option));
+      } else {
+        XTalk(user1,MStrPrint("I64 copy_level_id_clipboard=%d;\n",copy_level_id_clipboard));
+      }
+      //---------
+//-------
+      XTalk(user1,"#include \"Scripts/RegRelated\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultLevelScript\";\n");
+//-------
+      if (!is_update) {
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",copy_level_id_clipboard));
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\");\n",copy_level_id_clipboard));
+      } else {
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\");\n",select_option));
+      }
+      XTalk(user1,MStrPrint("Bool IS_SWAP=FALSE;\n"));
+      XTalk(user1,MStrPrint("Bool IS_MOVE=FALSE;\n"));
+      XTalk(user1,"#include \"Scripts/DefineClassValues\";\n");
+      XTalk(user1,"#include \"Scripts/SuperSaves\";\n");      
+      XTalk(user1,"#include \"Scripts/WriteMapToSlot\";\n"); //updates map
+      XTalk(user1,"#include \"Scripts/MoveMap\";\n");      
+//
+      if (is_swap || is_move) {
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+        XTalk(user1,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\");\n",select_option));
+        XTalk(user1,MStrPrint("Bool IS_SWAP=%d;\n",is_swap));
+        XTalk(user1,MStrPrint("Bool IS_MOVE=%d;\n",is_move));
+        XTalk(user1,"#include \"Scripts/DefineClassValues\";\n");
+        XTalk(user1,"#include \"Scripts/SuperSaves\";\n");      
+        XTalk(user1,"#include \"Scripts/WriteMapToSlot\";\n"); //updates map
+        XTalk(user1,"#include \"Scripts/MoveMap\";\n");
+      }
+      //---------
+      XTalk(user1,"#include \"Tmp/MAP1\";\n");
+      if (is_swap) {
+        XTalk(user1,"#include \"Tmp/MAP2\";\n");
+      }
+      XTalk(user1,"DelTree(\"Tmp\");\n");
+      XTalk(user1,"#include \"Pages/MapSelect\";\n");
+      break;
+    case 7://Rename
+      XTalk(user1,"I64 map_slot_action=3;\n");
+      XTalk(user1,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+      XTalk(user1,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+      XTalk(user1,"#include \"Pages/MapCreate\";\n");
+      break;
+    case 8://Delete
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesLevels/slot_%d",select_option),default_level);
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d",select_option),default_level_script);
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesNames/slot_%d",select_option),"U8 *slot_map_name=\" \";\n");
+      RegWrite(MStrPrint("TempleOS/Insecticide/Saves/SavesScores/slot_%d",select_option),"F64 best_score=9999;\n");
+      XTalk(user1,MStrPrint("I64 select_option=%d;\n",select_option));
+      XTalk(user1,"I64 copy_level_id_clipboard=-1;\n");
+      XTalk(user1,"#include \"Pages/MapSelect\";\n");
+      break;
+    case 9://tutorial
+      XTalk(user1,"mse_type+=10;\n");
+      XTalk(user1,"#include \"Scripts/DefaultMapFormat\";\n");
+      XTalk(user1,"#include \"Scripts/DefaultLevelScript\";\n");
+      XTalk(user1,"#include \"Scripts/tutorial_LVL\";\n");//saves
+      XTalk(user1,"RegDefault(\"TempleOS/Insecticide/Tutorial\",\"F64 best_score=9999;\\n\");\n");
+      XTalk(user1,"RegExe(\"TempleOS/Insecticide/Tutorial\");\n");//score
+      XTalk(user1,"I64 LOADED_MAP_ID=0;\n");
+      XTalk(user1,"I64 ms_select_option=0;\n");
+      //--------------
+      XTalk(user1,"#include \"Scripts/DefaultGameInclude\";\n");
+      XTalk(user1,"#include \"Scripts/tutorial_LVL_Script\";\n"); 
+      //--------------
+      XTalk(user1,"#include \"Pages/Game/BugGame\";\n");
+      break;
+  }
+}
+
+U0 DrawMapSelector(CTask *task,CDC *dc)
+{
+  I64 i,q=8*16;
+  U8 *txt="";
+  dc->color=BLACK;
+  GrRect(dc,0,0,GR_WIDTH,GR_HEIGHT);
+  DrawAnimation(task,dc,CENTER_LENGTH,CENTER_HEIGHT);
+  dc->color=WHITE;
+  GrPrint(dc,0,0,"%s",game_title);
+  GrPrint(dc,0,16,"Map Selector");
+  dc->color=LTCYAN;
+  GrPrint(dc,0,32,
+"
+*[SHIFT_C]:      Create New Map  
+*[SHIFT_R]:      Rename Map	  
+*[CTRL_C]:       Copy Map	
+*[CTRL_V]:	 Paste Map	
+*[CTRL_M]:	 Move Copied Map
+*[CTRL_X]:	 Stop Copying
+*[SHIFT_DEL]:	 Delete Map		
+*[SHIFT_ESC]:	 Leave
+");
+  dc->color=CYAN;
+  GrPrint(dc,0,32,
+"
+				   *[UP]/[DOWN]:    Go up/down the list
+				   *[LEFT]/[RIGHT]: Choose Map Action
+				   *[ENTER]:	    Map Action
+				   *[SHIFT_U]:	    Update Selected Map
+				   *['E']:	    Export Selected Map
+				   *['I']:	    Import Map from T:/
+");
+  Highlight(Blink,CYAN,LTCYAN,dc);
+  GrPrint(dc,0,32+8*6,"
+				   *['?']:	    Tutorial");
+  dc->color=YELLOW;
+  GrPrint(dc,0,q-10,"  Levels		Best Score");
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    Highlight(i==select_option,LTGREEN,DKGRAY,dc);
+    GrPrint(dc,0,q+8*i,"-");
+  }
+  for (i=0;i<MAX_MAP_NUM;i++) {
+    txt=saves_name_arr[i];
+    if (txt[0]!=' ') {
+      if (copy_level_id_clipboard!=i) {
+        Highlight(i==select_option,LTGREEN,DKGRAY,dc);
+        GrPrint(dc,0,q+8*i,"  [%s]",txt);
+        Highlight(i==select_option,LTGREEN,GREEN,dc);
+        GrPrint(dc,0,q+8*i,"  			%5.4f",best_score_arr[i]);
+      } else {
+	dc->color=CYAN;
+        GrPrint(dc,0,q+8*i,"  [%s]",txt);
+        GrPrint(dc,0,q+8*i,"  			%5.4f",best_score_arr[i]);
+      }
+    } else {
+      Highlight(i==select_option,LTGREEN,DKGRAY,dc);
+      GrPrint(dc,0,q+8*i,"  Slot %d",i);
+      GrPrint(dc,0,q+8*i,"          -");
+    }
+  }
+  Highlight((Blink && choose_map_action==0),YELLOW,DKGRAY,dc);
+  GrPrint(dc,0,8+q+8*MAX_MAP_NUM,"[1¯:Play");
+  Highlight((Blink && choose_map_action==1),YELLOW,DKGRAY,dc);
+  GrPrint(dc,0,8+q+8*MAX_MAP_NUM,"           ®2¯:Edit Map");
+  Highlight((Blink && choose_map_action==2),YELLOW,DKGRAY,dc);
+  GrPrint(dc,0,8+q+8*MAX_MAP_NUM,"                          ®3]:Map Settings");
+  dc->color=LTGREEN;
+  GrPrint(dc,4,q+8*select_option,">");
+  //DrawTips(task,dc,8,8+q+8*MAX_MAP_NUM+8*4,WHITE);
+  DrawTips(task,dc,8,GR_HEIGHT/2+8*20,WHITE);
+}
+
+U0 BugGameMapSelect()
+{
+  U8 *map_name_check="";
+  I64 arg1,arg2;
+  SettingsPush;
+  AutoComplete;
+  //WinBorder;
+  WinMax;
+  DocCursor;
+  DocClear;
+  GrPaletteSet(gr32_palette_std);
+  Fs->draw_it=&DrawMapSelector;
+  CTask *animate_background,*animate_snd,*user_tmp;
+  animate_background=Fs->animate_task=Spawn(&AnimateMenu,NULL,"Task",,Fs);
+  animate_snd=Fs->animate_task=Spawn(&AnimateStartSnd,NULL,"Task",,Fs);
+  try {
+    while (TRUE) {
+      switch(MessageGet(&arg1,&arg2,1<<MESSAGE_KEY_DOWN+1<<MESSAGE_KEY_UP)) { 
+        case MESSAGE_KEY_DOWN:
+          switch (arg1) {
+            case 0:
+              switch (arg2.u8[0]) {
+                case SC_CURSOR_UP:
+		  select_option=LimitValue(select_option-1,0,MAX_MAP_NUM);
+                  break;
+                case SC_CURSOR_DOWN:                  
+		  select_option=LimitValue(select_option+1,0,MAX_MAP_NUM);
+                  break;
+		case SC_CURSOR_LEFT:
+		  choose_map_action=LimitValue(choose_map_action-1,0,3);
+		  break;
+		case SC_CURSOR_RIGHT:
+		  choose_map_action=LimitValue(choose_map_action+1,0,3);
+		  break;
+              }
+              break;
+          }
+          break;
+        case MESSAGE_KEY_UP:
+          switch (arg1) {
+            case 0:
+              switch (arg2.u8[0]) {
+	    	case SC_DELETE:
+	      	  if (!(arg2&SCF_CTRL)) {
+	      	    map_name_check=saves_name_arr[select_option];
+		    if (arg2&SCF_SHIFT && map_name_check[0]!=' ') { //Delete
+		      ChangePage(8);
+	              Kill(animate_background);
+	              Kill(animate_snd);
+	              Exit;
+                    }
+                  }
+	          break;
+              }
+              break;
+            case CH_ESC: //Abort
+            case CH_SHIFT_ESC:
+              ChangePage(5);
+	      Kill(animate_background);
+              Kill(animate_snd);
+	      Exit;
+              break;
+	    case '\n':
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+	        ChangePage(choose_map_action);
+	        Kill(animate_background);
+	        Kill(animate_snd);
+	        Exit;
+	      }
+	      break;
+	    case 'e':
+	    case 'E'://map export
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {//only if NOT empty
+		if (!FileFind(MStrPrint("Exports/%s.ISO.C",saves_name_arr[select_option]))) {
+                  //Write map to file on tmp task
+		  DirMake("ExportTmp");
+		  DirMake("Tmp");
+		  DirMake("ExportTmp/Save");
+		  DirMake("ExportTmp/Script");
+		  user_tmp=User;
+  		  XTalk(user_tmp,MStrPrint("Cd(\"%s\");\n",Here));
+  		  XTalk(user_tmp,"DocClear;\n");
+  		  XTalk(user_tmp,"#include \"Here\";\n");
+  		  XTalk(user_tmp,"#include \"Scripts/Common\";\n");
+      		  XTalk(user_tmp,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevels/slot_%d\");\n",select_option));
+     		  XTalk(user_tmp,MStrPrint("RegExe(\"TempleOS/Insecticide/Saves/SavesLevelsScripts/slot_%d\");\n",select_option));
+      		  XTalk(user_tmp,"#include \"Scripts/DefineClassValues\";\n");
+      		  XTalk(user_tmp,"#include \"Scripts/SuperSaves\";\n");      
+	          XTalk(user_tmp,"#include \"Scripts/WriteMapToSlot\";\n");
+      		  XTalk(user_tmp,MStrPrint("U8 *LOADED_MAP_NAME=\"%s\";\n",saves_name_arr[select_option]));
+      		  XTalk(user_tmp,MStrPrint("I64 LOADED_MAP_ID=%d;\n",select_option));
+	          XTalk(user_tmp,"WriteMapToSlot(\"SaveMap\",LOADED_MAP_ID,LOADED_MAP_NAME,-1,ScriptTxt,DEFAULT_EXTENSION,FALSE);#include \"Scripts/LevelExportWrite\";\n");
+	          XTalk(user_tmp,"Exit;\n");
+		  //
+	          ExportMap(MStrPrint("Exports/%s.ISO.C",saves_name_arr[select_option]),saves_name_arr[select_option],DEFAULT_EXTENSION,is_zeal);
+		  JoinMapSelector(Here,animation_menu_sec,select_option,mse_type,-1);
+		  DelTree("ExportTmp");
+		  DelTree("Tmp");
+	          Kill(animate_background);
+	          Kill(animate_snd);
+	          Exit;
+		} else {//Export already exists
+    		  PopUpOk(MStrPrint("\n$BK,1$$FG,4$!$BK,0$ Map $FG,0$\"%s\" $FG$$FG,4$had already been Exported $BK,1$!$BK,0$$FG$\n",saves_name_arr[select_option]));
+		}
+	      }
+	      break;
+	    case 'i':
+	    case 'I'://map import
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]==' ') {//if empty
+	        if (ImportMapFromT(DEFAULT_EXTENSION)) {
+	          JoinMapSelector(Here,animation_menu_sec,0,mse_type,-1);
+		  if (FileFind("ImportTmp")) {
+		    DelTree("ImportTmp");
+		  }
+		  DelTree("Tmp");
+	          Kill(animate_background);
+	          Kill(animate_snd);
+	          Exit;
+	        }
+	      }
+	      break;
+	    case '1'://play map
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+		ChangePage(0);
+		Kill(animate_background);
+	        Kill(animate_snd);
+	        Exit;
+	      }
+	      break;
+	    case '2'://map edit
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+		ChangePage(1);
+	      	Kill(animate_background);		
+	        Kill(animate_snd);
+		Exit;
+              }
+	      break;
+	    case '3'://map settings edit
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+		ChangePage(2);
+	      	Kill(animate_background);		
+	        Kill(animate_snd);
+		Exit;
+              }
+	      break;
+	    case CH_CTRLX://stop all operations
+	      copy_level_id_clipboard=-1;
+	      break;
+	    case CH_CTRLC://Copy
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+	        copy_level_id_clipboard=select_option;
+	      } else {
+		copy_level_id_clipboard=-1;
+	      }
+	      break;
+	    case CH_CTRLV://Paste
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]==' ' && copy_level_id_clipboard!=select_option && copy_level_id_clipboard!=-1) {
+		ChangePage(6);
+	      	Kill(animate_background);		
+	        Kill(animate_snd);
+		Exit;
+              }
+	      break;
+	    case CH_CTRLM://Paste Moving
+	      map_name_check=saves_name_arr[select_option];
+	      if (copy_level_id_clipboard!=-1 && copy_level_id_clipboard!=select_option) {
+	        if (map_name_check[0]==' ') {//slot is empty
+		  is_move=TRUE;
+		} else {//slot is not empty
+		  is_swap=TRUE;
+		}
+		is_update=FALSE;
+		ChangePage(6);
+	      	Kill(animate_background);		
+	        Kill(animate_snd);
+		Exit;
+              }
+	      break;
+	    case 'R': //map Rename
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {
+	        ChangePage(7);
+	        Kill(animate_background);		
+	        Kill(animate_snd);
+	        Exit;
+	      }
+	      break;
+	    case 'U': //Update Map
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]!=' ') {//not empty
+		is_update=TRUE;
+		ChangePage(6);
+	      	Kill(animate_background);		
+	        Kill(animate_snd);
+		Exit;
+              }
+	      break;
+	    case 'C'://map create
+	      map_name_check=saves_name_arr[select_option];
+	      if (map_name_check[0]==' ') {
+	        ChangePage(3);
+	        Kill(animate_background);
+	        Kill(animate_snd);
+	        Exit;
+	      }
+	      break;
+	    case '?':
+	      ChangePage(9);
+	      Kill(animate_background);
+	      Kill(animate_snd);
+	      Exit;	
+	      break;
+	  }
+      }
+    }  
+exit_map_selector:
+  } catch
+    PutExcept;
+  SettingsPop;
+  Kill(animate_background);
+  Kill(animate_snd);
+  Exit;
+  MenuPop;
+}
+
+BugGameMapSelect;

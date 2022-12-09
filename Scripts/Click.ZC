@@ -1,0 +1,31 @@
+//-----------------------------------------------------------
+//Click
+Bool left_click=FALSE,right_click=FALSE;
+I64 left_click_hold_timer=0,right_click_hold_timer=0;
+
+U0 Click()
+{
+//Left click
+  if (mouse.lb) {
+    left_click=TRUE;
+    left_click_hold_timer=64;
+  }
+  if (left_click_hold_timer>0) {
+    left_click_hold_timer--;
+  }
+  if (left_click_hold_timer==0) {
+    left_click=FALSE;
+  }
+//Right click
+  if (mouse.rb) {
+    right_click=TRUE;
+    right_click_hold_timer=64;
+  }
+  if (right_click_hold_timer>0) {
+    right_click_hold_timer--;
+  }
+  if (right_click_hold_timer==0) {
+    right_click=FALSE;
+  }
+}
+//----------------------------------------------------------

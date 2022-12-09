@@ -1,0 +1,11 @@
+
+U0 AnimateStartSnd(I64)
+{
+  I64 play_snd=20;
+  while (TRUE) {
+    if(play_snd>0) {
+      play_snd=PlaySound(play_snd,70,0);
+    }
+    Sleep(2);
+  }
+}

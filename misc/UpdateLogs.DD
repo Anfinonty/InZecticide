@@ -1,0 +1,1728 @@
+
+$FG,2$05/25/2021$FG$
+Making character sprites
+
+
+$FG,2$05/27/2021$FG$
+Made Ground and character movements
+
+
+$FG,2$05/28/2021$FG$
+Make ground physics
+
+
+$FG,2$06/02/2021$FG$
+Improved ground/slope physics
+
+Future plans: 
+-make those with gradient>1 be a "wall" (swap y/x) $FG,2$06/08/2021$FG$
+-you cannot climb "walls" unless you have switched to swap [scrapped]
+-Add ceiling (opposite of floors)
+-Add player standing on edge (slope_dependent)
+
+$FG,2$06/08/2021$FG$
+-Work in progress on walls and slopes
+
+$FG,2$06/09/2021$FG$
+-Added walls of steep slopes
+-steep slopes are climbable
+
+$FG,2$06/10/2021$FG$
+-added wall,ground and ceiling
+-plan: make a "climb" mode 
+
+$FG,2$06/11/2021$FG$
+-added climb for left-player-right-walls
+-added climb for left-walls-right-player
+-added climb for non-steep ceiling
+-added climb for steep ceilings
+
+-plan: better ceiling climb
+-plan2: climbing on near inf gradient walls
+
+$FG,2$06/12/2021$FG$
+-weird bug with wall that doesnt disable climb mode
+
+$FG,2$06/13/2021$FG$
+-revamped wall collision & climbing from knowldge gathered from previous
+ attempts.
+
+$FG,2$06/14/2021$FG$
+-Added "Corners"
+
+$FG,2$06/21/2021$FG$
+-Plan: For certain WALL corners, player cannot rst_up or rst_down.
+
+$FG,2$08/01/2021$FG$
+-Changed plyer from a point into a rectangle for better collision handling
+
+
+$FG,2$08/12/2021$FG$
+-Added line "edges" and fixed corner issues
+-Plan: 
+    -proper steep wall collide
+    -Climbing wall thats negative to the player
+
+$FG,2$08/15/2021$FG$
+-Added proper steep wall collide
+-Plan:
+    -Climbing non-steep-walls
+    -Climbing steep walls
+
+$FG,2$08/26/2021$FG$
+-Added Climbing for ceiling and slope
+-Plan:
+    -Patch clipping due to climb implementation
+
+$FG,2$08/27/2021$FG$
+-Ceiling plan and non-steep wall climb work properly
+-Plan:
+    -Add steep wall climb
+
+
+$FG,2$08/28/2021$FG$
+-Added Side Edge
+-Somewhat added steep wall collide - it needs improvement
+
+$FG,2$08/30/2021$FG$
+-Added Climb when player left, positive steep wall right
+-Added climb when player left, negative steep wall right
+-Added climb when positive steep wall left, player right
+-Added climb when negative steep wall left, player right
+-Fixed clip between steep_wall +ceiling
+-Fixed clip between wall + ceiling
+  -player jumps through the ceiling
+-Plan:
+    -Fix player clip between steep wall + wall
+    -Fix player clip between wall + wall
+    -Fix player clip between ceiling + floor (i dont plan to fix this)
+      -> climb wall -> clips through ceiling
+
+
+$FG,2$09/3/2021$FG$
+-Fixed player clip between steep wall + wall
+-Fixed player clip between wall + wall
+-Added map editor
+-Plan:
+    -Fix ceiling-ceiling clip
+
+$FG,2$09/4/2021$FG$
+-Fixed ceiling-ceiling clip
+-added map selector
+-added map settings
+-added map creator
+-Plan: 
+  -set player position
+  -add web creation/destroy
+
+$FG,2$09/05/2021$FG$
+-added set player pos
+-added map edit gui move pos
+-Added web build
+-plan:
+  -fix ceiling + floor
+-Removed climb celing
+	-can be substituded via build webs
+-fixed some collision clip bugs
+
+
+$FG,2$09/12/2021$FG$
+-Added validwall highlight
+-improved buildwall
+-plan:
+  -fix invalid wall even when not in range
+
+
+$FG,2$09/13/2021$FG$
+-Added camera movement
+-Added player speed
+
+$FG,2$09/20/2021$FG$
+-Fixed camera shake when standing still
+
+-plan:
+  -add handling infinite steep wall
+  -add handling 0 gradient ceiling
+
+
+$FG,2$09/22/2021$FG$
+-Fixed clip 0 gradient ceiling
+plan:
+  -add corners
+
+$FG,2$10/03/2021$FG$
+-Revamped physics
+$BK,1$-added angles$BK,0$
+-player can climb seamlessly
+
+plan:
+-Deal with change of climbing line with different angle
+-Deal with climbing upside down
+
+
+
+$FG,2$10/09/2021$FG$
+-player can infact climb and below ground of all angles
+
+plan:
+-Deal with acending tile id clash/overwrite
+
+
+$FG,2$10/10/2021$FG$
+-Deal with changing from top/below
+
+$FG,2$10/12/2021$FG$
+-Player can now climb all lines without clipping *MAJOR*
+-add jump
+-add sprint
+-no cam shake
+-Plan:
+  -make rotate cam
+
+
+$FG,2$10/13/2021$ER$$FG$
+-Added rotate cam
+-Added player rotation
+-Plans:
+	-Build mode
+	-enemies
+
+$FG,2$10/15/2021$FG$
+-Optimized collision <<for each ground>>
+
+
+$FG,2$10/18/2021$FG$
+-Added optimized path finding for flying enemies:
+
+
+$FG,2$10/24/2021$FG$
+-handle follow range overflowing through edge of map
+-enemies with different follow ranges
+-start_node=enemy, end_node=random
+-start_node=enemy, end_node=player
+-enemy actually moving
+-enemy resets path finding after reaching the target
+$FG,4$-added O(log(n)) pathfinding **MAJOR$FG$ [SCRAPPED]
+-enemy can idle and go to random nodes
+-enemy now follows player on close proximity (to be improved)
+-enemy resets path finding when the player crosses them
+-fixed: enemy goes out of bounds when player is at wall
+
+
+$FG,2$10/30/2021$FG$
+-Fixed enemy out of bounds
+-path finding reverted to classic version since sorting is slower
+ compared to a for loop.
+
+
+$FG,2$11/3/2021$FG$
+-Added enemy to map editor
+-enemy now cannot clip through node corners
+
+
+$FG,2$11/4/2021$FG$
+-Added more enemy attributes
+-added more to map editor and map settings
+
+
+$FG,2$11/5/2021$FG$
+-Added adjustable Enemy Speed & Enemy Speed Multiplier
+
+
+$FG,2$11/6/2021$FG$
+-Optimized pathfinding
+-rotatable grid view
+
+
+$FG,2$11/8/2021$FG$
+-build mode within player grid-nodes
+-fix if gradient is infinite (y), break game
+
+
+$FG,2$11/14/2021$FG$
+-Added render distance
+-destroying a web
+
+$FG,2$11/15/2021$FG$
+-plan but lazy:
+  -display placeable nodes within player 
+   range during build mode
+
+-plan:
+  -Max web is 100 but player also has max webs which is less than 100
+
+
+$FG,2$11/19/2021$FG$
+-Added Web limit
+
+$FG,2$11/20/2021$FG$
+-Added Flip sprite
+
+$FG,2$11/21/2021$FG$
+-Added more enemy attributes for attacking
+-Added bullets class
+
+$FG,2$11/22/2021$FG$
+-Added enemy bullets
+
+
+$FG,2$11/23/2021$FG$
+-Added line of sight
+
+$FG,2$11/24/2021$FG$
+-Bullet effects web
+-Bullet effects player
+
+$FG,2$11/25/2021$FG$
+-Bullet detects ground rather than nodegrid
+-LOS detects ground rather than nodegrid
+-Proper targetting player mode as enemy attributes
+
+$FG,2$11/26/2021$FG$
+-Enemy immediately hostile when seen & player nearby
+-Added stealth
+-Player attacking enemy
+-Enemy Knockback
+
+$FG,2$11/27/2021$FG$
+-improved attack
+-Added Enemy Type
+  -max enemy type=30
+  -saved enemy type[]={}
+
+$FG,2$11/28/2021$FG$
+-fixed set enemy type not saving properly
+
+
+$BK,1$$FG,10$11/30/2021$BK,0$$FG$
+-worked more on getting the enemy type gui up
+-add saved enemy_type i64 attr
+-Enemy type in map editor and special GUI
+
+$FG,2$12/02/2021$FG$
+Due to memory issues, remove saved enemy attributes, replace with
+enemy type attributes
+
+$FG,2$12/03/2021$FG$
+-Changed enemy attributes for map editor
+
+$FG,2$12/06/2021$FG$
+-added ghost grounds
+-added coloured grounds
+
+$FG,2$12/07/2021$FG$
+-added game over-reset delay
+-Bug (PATCHED):
+  -3 >= webs
+    -At half map width, crash
+    -At last grid y, crash
+  -Caused by render distance moving issues
+
+$FG,2$12/08/2021$FG$
+-Worked on gravity
+-clipping less likely to happen
+-Added Day/Night backgrounds
+-patched rdgrid not updating properly when near the map edge
+-made map0 (day mode)
+
+$FG,2$12/09/2021$FG$
+-continue making map0 (day mode)
+
+$FG,2$12/10/2021$FG$
+-Bug: (PATCHED)
+  -Enemy Draw and Player Draw causes memory leak during gameplay
+  -patched by Freeing the *matrix Free(matrix);
+-Fixed enemy bullet not passing thru ghost ground
+
+
+$FG,2$12/16/2021$FG$
+-Hearts for health
+-Game Song work in progress
+-Player Speedbreaker Timer, Recharge
+-lock pov view  
+
+$FG,2$12/17/2021$FG$
+-Player Web count GUI
+-Player Speedbreaker GUI
+-Ground type: 1-flood fill
+-Map Editor:
+  -'f' for cam_x and cam_y to go to the axis of target
+
+
+$FG,2$12/21/2021$FG$
+-Added Daymode song
+-Added Ground type - "text"
+-Added ID search
+
+$FG,2$12/27/2021$FG$
+-Text editor for ground type "text" is really tricky
+to work with.
+
+
+$FG,2$12/28/2021$FG$
+-Added Text editor for ground type "text".
+
+$FG,2$12/29/2021$FG$
+-Added the use for up arrows and down arrows for the
+text editor for ground type "text".
+
+
+$FG,2$12/30/2021$FG$
+Dynamic registry:
+
+*array is in alphabetical order (a-z)
+
+*
+  pos in best score
+a 0
+b 1
+t 2
+g 3
+
+
+* add c
+  pos in best score
+a 0
+b 1
+c 2
+t 3
+g 4
+
+* remve b
+
+a 0
+c 1
+t 2
+g 3
+
+-Added dynamic registry
+-Added gamemode 0 (kill all enemies)
+-Added Reset best_score of map (MapSettings)
+-Added msg feedback after exit
+-Can detect if map exists
+-Maximum number of maps
+
+$FG,2$1/1/2022$FG$
+-Scores are now stored in the registry instead of locally
+-Time slows when speedbreaker is enabled
+-Game mode types:
+  1: Reach the destination (Best score=Best time)
+-Added player hurt noise
+    -Snd Duraiton   I64
+    -Snd Pitch      I64
+    -Snd Randomness I64
+-Added enemy hurt noise
+    -Snd Duration   I64
+    -Snd Pitch      I64
+    -Snd Randomness I64
+-Added enemy death noise
+-Tasks in BugGame.HC.Z are killed manually instead of just settingspop
+
+$FG,2$1/3/2022$FG$
+-Added customizable enmy death noise
+-Added Health regen        (kill enemy, soul++, press '2' to regen 1 hp
+-Added Speed breaker regen (kill enemy, soul++, press '3' to regen some sb
+-Added Web regen***        (kill enemy, soul++, press '4' to regen 1 web
+    ->web destroyed by enemy,
+      ->cdw[cdw_pos]=GroundId;
+      ->cdw_pos++;      
+      ->cdw_web_num++;
+      ->if (cdw_pos>max_num-1) {
+	  cdw_pos=0;
+        }
+
+
+    -> player press '4'
+      if (cdw_web_num>0) {
+        if (webs[current_pos-1]==-1) {//behind current is -1?
+          webs[current_pos+1]==cdw[cdw_player_pos];
+        } else { //current_pos+1
+          if (current_pos<current_web_num-1) {//less than max-1?
+            if (webs[current_pos+1]==-1) {//infront current is -1?
+              webs[current_pos+1]==cdw[cdw_player_pos];
+            }
+          } else if (webs[0]==-1) {//web[0] is -1?
+	    webs[0]=cdw[cdw_player_pos];
+          }
+        }
+      }
+      ->cdw_web_num--;
+      ->cdw[cdw_pos]=0;
+      ->cdw_player_pos++;
+
+
+$FG,2$1/4/2022$FG$
+-Enemy Shoots at player only when within I64 shoot_at_player_range
+-Limited map cam movement when at border in mapeditor
+-speedbreaker infront of screen wehn its active
+-fixed enemy lock when targeting player but player is hiding
+-Added regen animation
+  -graphics for health regen
+  -graphics for speed breaker regen
+  -graphics for web regen
+
+
+
+
+$FG,2$1/5/2022$FG$
+***Unresolved bug: Type mode, when 1st char is \n, and backspaced, 
+row doesnt go back to 0 unless reset (Somewhat patched)
+
+***Unresolved bug: Type mode int, unable to search for "10" (goes to 9 instead)
+
+
+$FG,2$1/6/2022$FG$
+***Resolved bug: enemies sometimes disappears when entering a new gridsquare (DEBUGGED)
+  -Reason: overlooking that the enemie's saved queue should also be subtracted
+-added enemy aim_rand
+$FG,2$1/7/2022$FG$
+-Added Map: Tutorial
+-Added proper invert color:
+  0->15 +15
+  1->14 +13
+  2->13 +11
+  3->12  +9
+
+
+$FG,2$1/9/2022$FG$
+-Some Progress on the main menu animation
+
+
+$FG,2$1/10/2022$FG$
+-Added Menu Screen Art/Animation
+
+$FG,2$1/12/2022$FG$
+-Added Map: Level_1
+-Added Map: Level_2
+-Added Map: Level_3
+
+
+$FG,2$1/13/2022$FG$
+-Release v1.0
+
+
+-Updateed Map 0Tutorial
+-Updated Help for gameplay
+-Updated Regain web
+-Changed web building to be less restrictive
+-Added death at y higher than map height
+-Changed the AutoInstall
+
+-Added Map Editor Sticky placement Mode
+-Release v1.1
+
+
+$FG,2$1/14/2022$FG$
+-Added Import Map
+-Added Export Map
+-Release v1.2
+
+$FG,2$1/15/2022$FG$
+-Added some colours to main menu
+-Reduced the amount of times needed to shift_esc
+-Fixed update deleting saves
+-Right click now lets you build as well not just 'b'
+
+$FG,2$1/16/2022$FG$
+-Split Game Functions
+-Fix TxtInput blinkysquare not aligning right when at \n
+-Better UXD Flow
+-Fixed Words and flood fill not showing up properly
+-Release v1.3
+
+$FG,2$1/17/2022$FG$
+-Implement Zeal Porting
+-Fixed Grounds Crashing OS when x1==x2
+
+
+$FG,2$1/19/2022$FG$
+-fixed inverting of colors
+    $FG,4$0   15      +15    	0+15-0$FG$
+    1   14	+13    	1+15-2
+    2   13	+11     2+15-4
+    3   12	+9      3+15-6
+    4   11	+7	4+15-8
+    5   10	+5	5+15-10
+    6    9	+3	6+15-12
+    7    8	+1	7+15-14
+    8    7	-1	8+15-16
+    9    6	-3	9+15-18
+   10    5	-5	10+15-20
+   11    4	-7	11+15-22
+   12    3	-9	12+15-24
+   13    2	-11	13+15-26
+   14    1	-13	14+15-28
+   $FG,4$15    0	-15	15+15-30$FG$
+
+-Release v1.3.2
+
+$FG,2$1/20/2022$FG$
+-Fixed menu animation where enemy shooting
+ wasn't centered
+-Added update map
+-Added Ground type TriFill
+   -x3,y3
+   -floodfill lags on zealos
+-TOS/Zeal Import
+  -also has legacy import (pre v1.3.3)
+-Fixed ZealOS Night Palette
+-ZealOS Export PopUpOk before export
+
+$FG,2$1/22/2022$FG$
+-ZealOS Map Exports are now playable on TOS
+-Fixed map crashing after new grounds (heh) 
+ are added without moving them
+
+-Release v1.3.3
+-Added menu choose game
+
+
+$FG,2$1/23/2022$FG$
+-Fixed crash at TAB
+-Fixed Triangle fill sometimes not showing in game
+  -Fixed crash via triangle fill
+-Fixed ME Ground cursor Limit of x1 and x2 and x3
+
+
+$FG,2$1/24/2022$FG$
+-better gamemode choosing on start
+-maybe: fixed sometimes player cannot jump
+-Ctrl + S (Map Editor)
+-draw clipboards
+
+
+
+$FG,2$1/25/2022$FG$
+-Added MapEditor CTRLC & CTRLV
+  -enemy_type_clipboard
+    -all
+  -ground_clipboard
+    -x1,y1,x2,y2,x3,y3
+    -IsGhost
+    -Color
+    -Type
+    -Text
+  -retire 'p' for painting
+
+
+$FG,2$1/27/2022$FG$
+-added Copy Map   (CreateViaCopy + Rename)
+-added Rename Map (CreateViaCop + Rename + Del)  
+  -CTRL Y is save for typingtxt
+  -CTRL X is abort for typingtxt
+-Updated update map
+
+$FG,2$1/28/2022$FG$
+-Added Challenges Level_001
+
+
+$FG,2$1/29/2022$FG$
+-Updated nightmode to look better
+-Warning for floodfill
+
+
+$FG,2$2/2/2022$FG$
+-tri fill optimization for mapeditor
+
+
+$FG,2$2/3/2022$FG$
+-Change buildmode
+  -act like shoot bullet
+  -shoot bullet from RClick, when bullet hits solid, it places a ground
+  -bullet hurts enemy and passes through them like a laser
+  -uses the web/20
+  -web health weakens based on the web distance
+  -if bullet too far, place then break web (not retreivable)
+
+
+$FG,2$2/4/2022$FG$
+-Emotion for cursor 
+-Fixed enemy random aim not working properly
+-Hit ['] to change color
+
+$FG,2$2/5/2022$FG$
+-account buildmode for rotate view mode*****
+  -this involves maths & maths is hard
+
+
+0 Rad: above_player -> cursor       
+1 Rad: above_player -> cursor * 1 Rad
+
+-change some keys due to using mouse 
+
+
+
+$FG,2$2/6/2022$FG$
+-Press 'S' to drag enemies downwards while attacking  
+-Challenges (SavesChallenges) 
+-level side scripts
+    -Challenges Mode
+      -can be created (manual)
+      -can be created on game launch
+      -can be deleted (manual)
+    -Creative Mode:
+      -can be created
+      -can be created on game launch
+
+      -can be copied
+      -can be renamed
+      -can be deleted
+-import/export to also do that for the lvl scripts
+-Release v1.3.4
+-Bug  Fixed: Enemies outside of border disappear and may never return
+
+
+$BK,1$$FG,4$2/8/2022$FG$$BK,0$
+-Mites Enemy (Ground Enemy)
+-Mites target_node be Enemy[i].node_solid instead of NodeGrid.solid
+-Grav switch for ceiling climb
+-(hopefully) fixed player clipping through walls
+
+$FG,2$2/9/2022$FG$
+-Mite AI
+  -stops player's web
+
+$FG,2$2/10/2022$FG$
+-Mite AI
+  -Mite non-solid nodes should be increased in length & height efficiently
+  -Enemy Stick to platform
+  -Enemy Drop Down
+
+
+$FG,2$2/11/2022$FG$
+-Code cleanup
+-Mite AI
+  -Enemy Drop Down (dont drop if both are upside down)
+  -above player x,y 2 for mite (node*2)
+  -Mite falling sprite
+  -Enemy Weak spot:
+    -Enemy is upside down and player jumping/player rightside up
+    -Enemy is in midair
+    -Enemy is right side up and player is upside down
+  -Drop down changed from 'w' to 's'
+
+
+$FG,2$2/12/2022$FG$
+-Enemy[i].current_grid_id (already exists)
+  -paired with .saved_grid_id
+-Working on crawlerBoss level
+  -sprite pointer arrays are tricky to work with
+
+
+$FG,2$2/14/2022$FG$
+-Enemy drag to also be on all angles
+  -'w' when player below grnd
+  -'s' when player above grnd
+
+
+$FG,2$2/17/2022$FG$
+-Adjustable Controls Settings for players
+Random thoughts:
+
+*** ***
+I've thought of storing the Saves
+in the Registry but I think
+thats a bit too much.
+*** ***
+
+
+$FG,2$2/18/2022$FG$
+-Revamped to act with Registry
+  -Map Delete Process:
+    -Replace Saves with default
+    -set name to " "
+    -set best score to 9999
+
+
+  -Map Create Process:
+    -set name
+    -show best score && map is now edittable
+
+  -Map Rename Process
+    -RegWrite(Saves/SavesName);
+
+  -Map Save Process:
+    -launch map editor
+    -Write to HC.Z *txt
+
+    $FG,9$//CTRL S$FG$
+    -Write to HC.Z *txt
+
+    $FG,9$//After leaving map editor save or abort$FG$
+    -RegWrite whats in the HC.Z *txt
+    -Delete HC.Z
+
+  -Removed same name check (not needed)
+
+$FG,2$2/19/2022$FG$
+-Revamped:
+  -Script is U8 *ScriptTxt="...";
+
+  -Map Copy Process (Check map numbers)
+    -Include loaded_map_id
+    -loaded_map_id -> SavesLevels  -> Tmp
+    -loaded_map_id -> SavesScripts -> Tmp
+
+    -new_map_slot ========> for up until a map_name is " "
+
+    -Tmp -> RegWrite(Saves/SavesLevels /<new_map_slot>,Tmp_Level);
+    -Tmp -> RegWrite(Saves/SavesScripts/<new_map_slot>,Tmp_Script);
+    -Tmp -> RegWrite(Saves/SavesNames/<new_map_slot>,new_map_name);
+
+
+$FG,2$2/25/2022$FG$
+-Revamped:
+  -[NEW] Map Move Process
+    -CH_CTRLN move
+      -if on slot with map, swap,
+      -Map name is the same
+      -Move scores too
+  -Export Process (TOS):
+    -Run RegExe
+    -Write RegExe to HC.Z
+    -Copy HC.Z to Tmp
+    -Copy to Tmp
+    -Convert into HC.Z 
+    -Turn into ISO.C
+    -Delete Tmp
+  -Export Process (ZEAL (UNTESTED)):
+    -Run RegExe
+    -Write RegExe to ZC
+    -Copy ZC to Tmp
+    -Copy to Tmp
+    -Convert into TXT
+    -Turn into ISO.C
+    -Delete Tmp
+  -WriteMapToSlot Automatically updates the map (woah!!!)
+  -Map Import Process (different for zeal(untested)/tos):
+    -Copy T:/ to Tmp
+    -Run Tmp
+    -Convert into HC.Z  *txt
+    -RegWrite(txt) to empty slot
+    -Delete HC.Z
+
+$FG,2$2/26/2022$FG$
+-Some enemies dont go too close to the player
+  -->unchase range
+    if the player is within unchase range, stop moving to player
+  -->chase range
+    if the  player is within chase range, move to player
+
+-v1.4. isnt realsed yet -> 
+  -Export script as exported_script_txt="<Script>";
+  -Import Exported Script
+
+-'?' in Game should display keys from Settings
+-Toggle Game Music in Settings
+-Toggle Game Sound Effects in Settings
+-Arrow keys act like WASD too for gameplay (cannot be changed)
+
+
+$FG,2$2/27/2022$FG$
+-DeBugged: cannot rename map if the name length is at max (os crashes)
+-Updated README
+-Launcher actions:
+  -Del Scripts/DefaultMapFormat2.HC.Z
+  -Del Pages/MainMenu.HC.Z
+  -Del Pages/MapRename.HC.Z 
+  -Del Pages/UpdateMap.HC.Z
+
+  -Launcher Action to move old saves (pre-1.3.3) 
+   into registry
+  -copy Saves to ~/InsectSaves_BAK/
+  -DelTree ~/Insecticide/Saves
+  -Move actions
+  (acending alphabetical)
+    -move name
+    -move map saves
+
+
+   -1.3.3
+      -Saves
+        -save1.hc.z
+	-save2.hc.z etc.
+
+    -1.3.4 (memory holed)
+      -LevelSaves
+        -Saves
+      -LevelScripts
+        -Scripts (Unsalvagable)
+
+
+-Release v1.4.00
+
+
+
+$FG,2$2/27/2022$FG$
+-Bullet Firing
+  -bullet_fire_delay
+-Bullets per fire
+
+-Added bullet length
+-Fixed bug where render grounds may not work properly
+due to too much webs (it crashes the OS)
+-Added uppercut 
+  -to controls
+  -to gameplay
+
+
+$SP,"<1>",BI=1$
+
+
+
+
+
+
+
+
+
+
+
+
+    -2: Spread
+$SP,"<2>",BI=2$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$FG,2$03/01/2022$FG$
+-updated Level_005
+-updated Level_003
+-SHIFT_R to reset score of challenges
+
+  -random tips at the bottom of the menu
+
+"You can shoot Webs while in mid air",
+"Crawlers cannot Fly",
+"Flies get stunned when hit by your Web head on",
+"You can do an \"air jump\" by shooting a web downwards while in mid-air",
+"Flies are dealt more damage when slammed against a platform",
+"Slamming a Crawlers' underside against a platform deals more damage",
+"A Crawler can't attack while falling",
+"A Crawler can't stand an attack to its underside",
+"Attack a Crawler when you're Rightside Up and it's Upside Down",
+"Attack a Crawler when you're Upside Down and it's Rightside Up",
+"If you cannot jump, the game is on the verge of crashing the OS",
+"TempleOS is made by Terry A. Davis",
+"An uppercut knocks an enemy perpendicular from your position",
+"Hold Left Click to increase Reaction Time",
+"Hold Right Click to shoot a web",
+"You can only shoot or build 1 web at a time",
+"If you are lagging on ZealOS, play this on 640x480 resolution",
+"Crawlers can Crawl on walls",
+"Press the Down Key to Drop down from the ceiling",
+"Hold Up and Press Attack while Upside Down to drag enemies up",
+"Hold Down and Press Attack while Rightside Up to drag enemies down",
+"Hold Right and Spam Left to climb upwards while upside down"
+"Hold Left and Spam Right to climb upwards while upside down"
+
+
+
+$FG,2$03/02/2022$FG$
+-Re-add old build mode
+  -for web_mode0, show valid/invalid web
+
+$FG,2$03/03/2022$FG$
+-Re-add old build mode
+  -cursor sprite for this kind of build mode
+  -lock_web_mode
+    -in midair it becomes web_mode=1
+      -back on ground, it becomes lock_web_mode
+    -the ground cannot be close or go through a crawler
+
+
+$FG,2$03/04/2022$FG$
+-Animated Backgrounds (day & night) - Clouds
+-Animated Backgrounds (night) - shooting starts
+-Player cannot shoot webs when near crawlers
+-Tell Users to Delete InsectiSavesBackup if all old saves have been transfered
+-fix game_title print (~/Coding/TitleTest)
+-updated the moon to look solid (bnnuy remains)
+-tips regarding web type 0
+
+
+
+$FG,2$03/05/2022$FG$
+-Release v1.4.01
+
+$FG,2$03/06/2022$FG$
+-Rare bug: bullets sometimes stop moving
+
+
+$FG,2$03/07/2022$FG$
+-something fishy sbout rendered_grid_num
+-forgor to set enemy[i]node_solids[j]=FALSE
+ in init
+   -this fixes the no jump crash :^)
+
+-while node from target_x & target_y is a solid,
+ stuck at while until non-solid is found
+  -unstable since this could cause crashing
+    -fixed by removing the while
+      -concept is the same but the enemy is
+       less hyperactive
+	-better than the game crashing
+  -Release v1.4.02
+
+
+
+$FG,2$03/09/2022$FG$
+Rest In Peace
+
+
+-Updated the clouds to look more solid
+-InitLS Updated to run along with \n (Restart)
+-MapEditor Sticky Grids
+
+
+$FG,2$03/10/2022$FG$
+-Settings to toggle clouds
+-Bonus: The Bravery- Tyrant
+
+
+
+$FG,2$03/12/2022$FG$
+-Enemies immune to tyrant effects
+  -map editor set_tyrant_immune
+  -map editor clipboard_tyrant_immune
+  -tyrant_immune
+
+
+
+$FG,4$HIATUS
+
+
+
+$FG,2$04/19/2022$FG$
+-Back from Hiatus
+-BUG PATCHED: Tyrant makes TyrantImmune enemies take more damage when hit
+	      with Uppercut
+-Controls to toggle Tyrant Immune
+  -GameSettings
+  -Text in '?' of Gameplay
+
+ $BK,1$ACHTUNG!$BK,0$
+ -Current compatability sys with ZealOS no longer works
+  with the newer ZealOS versions
+
+
+$FG,2$04/22/2022$FG$
+-Launcher should update all unnamed maps
+-Release v1.4.03
+
+
+
+$FG,2$04/23/2022$FG$
+ $BK,1$ACHTUNG!$BK,0$
+ -Current compatability sys with ZealOS still works
+  with Zeal 4-17-2022
+ -Countdown timer GUI for the bravery tyrant
+ -Eyes Cursor Sprites for the bravery tyrant
+
+
+$FG,2$04/24/2022$FG$
+-fixed sticky not working
+-2GB RAM is large enough to load 9000 grounds and 100 enemies 
+  -not all in 1 render distance
+  -512MB RAM is too small for extremely large maps and it wont load
+  -however you can still adjust its settings and edit the map   
+
+
+$FG,2$04/27/2022$FG$
+player_speed_breaker_recharge_cooldown_max=DEFAULT_PLAYER_SPEED_BREAKER_RECHARGE_COOLDOWN;
+-Dodging increases the reaction bar recharge rate
+
+$FG,2$04/28/2022$FG$
+  -Performance rate
+    -bullet dodged
+    -enemy hitstreak (needs working on)
+  -GUI bottom left on performance rate
+
+$FG,2$04/29/2022$FG$
+-Finalised enemy Hitstreak
+  -meelee and shooting
+
+
+
+$FG,2$05/01/2022$FG$
+-blocking sprites
+-block limitations:
+  -unable to move when blocking
+  -can be done while on ground only
+  -no combos gained
+  -unable to attack (can shoot though)
+
+
+
+$FG,2$05/02/2022$FG$
+-block limitations:
+  -limited bullets
+    -if damage> allowed limit, block removed immediately
+-block only possible when on ground
+-block button is opp of jump
+
+
+
+$FG,2$05/03/2022$FG$
+-deal with down + attack since down is now the block btn 
+  -down only = block
+    -when '1': attack stop blocking
+      -if down is still held, go back to blocking  
+-Performance rate
+  -enemy killstreak 
+-change to vers 1.4.04
+-block health sprites
+-balanced rating rewards
+-adding performance text
+
+
+$FG,2$05/04/2022$FG$
+-performance rate saying in middle of screen
+  -3rd last star: GOOD
+  -2nd last star: GREAT
+  -last star:     AWESOME
+  -Beyond:	    INSECTICIDE
+
+$FG,2$05/05/2022$FG$
+-performance_grade_array
+
+
+$FG,2$05/06/2022$FG$
+-Bug fixes:
+  -Deal with rare bug: sometimes reaction bar stops filling up (unverifiable)
+  -Bug: Player hit with bullet increases game rating
+ 
+
+-Screen shake when: player hit, the bravery tyrant
+-option: Screen Shake: On/Off
+-hit enemy = screen shake (slight)
+-Praise Text shaking
+
+
+$FG,2$05/09/2022$FG$
+-Bug Fixed: Picking up a web while its being shot crashes the game
+
+
+
+$FG,2$05/10/2022$FG$
+-rightclick + attack = attack
+-rightclick = shoot web
+
+
+
+$FG,2$05/11/2022$FG$
+-Rating color
+-Rating affects regen after >75% rating (hp, reaction, web regain)
+-Adjusted player bullet -> enemy collision box
+-Extra: speedbreaker can be used while tyrant if rating is extreme
+-tyrant holds the combo
+
+
+
+$FG,2$05/12/2022$FG$
+-Added Diabetes (blood sugar)
+-Splited game into 2 cores: 1 for graphics and 1 for gameplay
+
+
+$FG,2$05/13/2022$FG$
+-Fixed Blood Sugar
+
+
+
+$FG,2$05/16/2022$FG$ $FG,10$Monday$FG$
+-Red Flash screen when dmg
+
+
+$FG,2$05/17/2022$FG$ $FG,10$Tuesday$FG$
+-Fixed: initls in script disables the game palette
+  ->fiure way around the normal system in the InitLS
+
+-enemy hovers above ground -
+   they are unable to go too close to the ground
+    -Just make thicker grounds when building + use sticky
+-add settings to enable/disable flash when dmg
+
+-controlled jump height
+  -down + jump = Jump higher/lower OR
+  -jump then +down = stop jump height
+
+-Combo Penalty for getting hit
+
+
+$FG,2$05/19/2022$FG$ $FG,10$Thursday$FG$
+-*diff song = diff tempo and stacato
+$FG,2$
+
+05/20/2022$FG$ $FG,10$Friday$FG$
+-Changed night heart n block hearts color
+$FG,2$
+
+05/21/2022$FG$ $FG,10$Saturday$FG$
+-Enemy Bullet Graphics Type (Normal, Small, Normal Solid, Flicker)
+-map editor n gameplay
+-updated challenges to have enemies with new bullet graphics
+
+
+$FG,2$
+05/22/2022$FG$$FG$ $FG,10$Sunday$FG$
+-added sparkle-solid bullet
+
+
+$FG,2$05/28/2022$FG$$FG$ $FG,10$Saturday$FG$
+-Added custom Background Color
+-after bravery tyrant, reaction units =0
+-remove slowdown time when bravery tyrant + over max performance
+
+
+
+$FG,2$05/29/2022$FG$$FG$ $FG,10$Sunday$FG$
+-Finished tutorial map
+
+
+
+$FG,2$05/30/2022$FG$$FG$ $FG,10$Monday$FG$
+-move map editor help and sticky upwards by 8
+-map editor winborder on/off
+
+-Tutorial
+  [Press '?' in Game Chal/Map Select]
+  -Scripts/TutorialLevel.HC.Z
+  -Scripts//TutorialScript.HC.Z
+
+-added ['?'] to let players knwo to press that to enter tutorial
+
+
+
+$FG,2$05/31/2022$FG$$FG$ $FG,10$Tuesday$FG$
+-Somewhat improved performance by moving Sprite axis arithmatic into Act Functions
+-Multiply player sprite when tbt or good performance or slow mo
+-YesLongBlur effect increase attack damage
+-  !! Fix Mem Leak !!:
+  -  JobQue causes memleak
+
+
+
+
+$FG,2$06/01/2022$FG$$FG$ $FG,10$Wednesday$FG$
+-fixed regen not working properly (wrong bool)
+-regen doubles when in yeslongfade
+-change func from "Blur" to "Fade"
+
+
+
+
+$FG,2$06/03/2022$FG$$FG$ $FG,10$Friday$FG$
+-Added Ground Fade
+
+
+
+$FG,2$06/13/2022$FG$$FG$ $FG,10$Monday$FG$
+-Non-player fade should linger 
+-Added enemy fade
+  -autos if multiplier>=2
+-palette for ground,enemy & bullet should invert also based on is_invertedbkgnd
+
+
+
+$FG,2$06/14/2022$FG$$FG$ $FG,10$Tuesday$FG$
+-BulletFade
+  -autos if multiplier >=2
+
+
+
+$FG,2$06/16/2022$FG$$FG$ $FG,10$Thursday$FG$
+-EnemyFade should have diff fade delays based on multiplier (same counts however)
+-BulletFade should have diff fade delays based on multiplier (same counts however)
+
+
+-settings to enable/disable:
+    -Player Fade
+    -Enemy  Fade
+    -Ground Fade
+    -Bullet Fade
+
+
+-Bug PATCHED: map editor inconsistent color invert
+-Bug PATCHED: speedbreak doesnt revert background camshake to 0
+-Blinking cursor when no web
+-alert player when boost is full (text only)
+
+
+
+
+
+
+$FG,2$06/17/2022$FG$$FG$ $FG,10$Friday$FG$
+-text in gui to state: REGENERATIONX2
+-text im gui to state: STRENGTH X2 
+-alert player when boost is full (sound)
+
+
+$FG,2$06/19/2022$FG$$FG$ $FG,10$Sunday$FG$
+-tmp screenshake when boost full
+
+
+$FG,2$06/22/2022$FG$$FG$ $FG,10$Wednesday$FG$
+-Blinking reaction infront screen bar when low
+-Detailed plans for tutorial script
+
+
+
+$FG,2$06/26/2022$FG$$FG$ $FG,10$Sunday$FG$
+*Tutorial:
+  -Normal: Hit Space to move dialogue
+
+
+
+$FG,2$06/29/2022$FG$$FG$ $FG,10$Wednesday$FG$
+*Tutorial Mascot drop down animation
+*Dialogue implemented
+
+  -Script for tutorial map
+    -HelpPlayer class
+
+
+$FG,2$06/30/2022$FG$$FG$ $FG,10$Thursday$FG$
+*HelpPlayers can position themselevs when player pov view
+
+
+$FG,2$07/01/2022$FG$$FG$ $FG,10$Friday$FG$
+*Added rock event trigger
+*Updated web trigger
+*Dialogue takes time to change to next
+
+
+$FG,2$07/07/2022$FG$$FG$ $FG,10$Thursday$FG$
+*Passed my driving test
+*gui when hold Uppercut
+*gui when hold Drag Towards
+
+$FG,2$07/08/2022$FG$$FG$ $FG,10$Friday$FG$
+***Needs testing***
+  -sprite animation consider resolution 
+*extra ? somewhere special
+
+
+$FG,2$07/09/2022$FG$$FG$ $FG,10$Saturday$FG$
+*near dummy flies - weakness graphics (WIP)
+*near dummy crawler - weakness graphics (WIP)
+
+
+
+
+$FG,2$07/11/2022$FG$$FG$$FG$ $FG,10$Monday$FG$
+*Better call saul day
+*Experienced my first panic attack,
+  im stressed out about my VISA
+
+
+**Near dummy flies
+  -Smashing a fly against a platform deals more damage to them.
+
+**Near dummy crawler
+  -Attacking a Crawler's Underside deals more damage to them.
+
+
+**Special
+    -'change view'
+    -press ' to change color
+
+
+*after max-1 complete of ?,
+  allow other event trigger
+
+
+
+
+
+$FG,2$07/14/2022$FG$$FG$$FG$ $FG,10$Thursday$FG$
+*Tutorial optimized performance when most && is removed
+*implemented misc action sequence (WIP)
+
+1.*star combo
+    *killing (after star combo strength)
+      *Blue performance only (after star combo)
+        *ltpurple performance only (after blue)
+	  (stop speed breaker cap at 0)
+	    *speedbreaker 100
+
+
+(After 1.)
+(Independent Alpha)
+
+	web collection
+
+	upside down
+
+	hiding 
+
+	tbt (after speedbreaker)
+
+*removed & optimized &&:
+   backgroudnactions
+   bullet actions
+   grid actions
+   nodegrid actions
+   buggame
+
+
+$FG,2$07/15/2022$FG$$FG$$FG$ $FG,10$Friday$FG$
+*Got my VISA
+*optimized logic of
+    -bullet
+    -enemy
+    -ground
+    -player
+    -etc.
+*bug after optimizing:
+  player not dropping down properly (patched)
+
+
+
+
+$FG,2$07/16/2022$FG$$FG$$FG$ $FG,10$Saturday$FG$
+==web collection go with HelpPlayer 2
+
+
+$FG,2$07/17/2022$FG$$FG$$FG$ $FG,10$Sunday$FG$
+++HelpPlayer 6 (Right Tree Branch)
+==HelpPlayer 3 and 4 are extras also
+++ all action dialogues n timers put in
+  ==kill and regen txt dialogue
++misc trigger event timer (100)
++tweak sequence for misc
++arrows pointing Blink for performance
+
+
+$FG,2$07/18/2022$FG$$FG$$FG$ $FG,10$Monday$FG$
++performance rating highlight dialogue
++graphics for hiding
++eyes emote: worried
++Bug PATCHED: enemies cannot be mele'd when tbt
++Bug PATCHED: cant shoot web when near DEAD crawler
++Release v1.4.04
+
+
+
+
+
+$FG,2$08/14/2022$FG$$FG$$FG$ $FG,10$Sunday$FG$
++Added 2 new tip messages
+  - This game is inspired by Sinjid (2013) made by KrinLabs
+  - 2GB of Memory is Recommended for Large Maps
++release v1.4.05 
+
+
+
+
+$FG,2$08/27/2022$FG$$FG$$FG$ $FG,10$Saturday$FG$
++New Song (Opening screen)
+
+
+$FG,2$09/10/2022$FG$$FG$$FG$ $FG,10$Saturday$FG$
++Delete v1.4.05
+  -there is a major bug which deletes map bg invert and color
+
++add intro as level schallenges
++sprint = ++ screenshake if screenshake is active
++tutorial dialogue slightly alterede to be more user friendly
++Bobbing
+
+$FG,2$09/11/2022$FG$$FG$$FG$ $FG,10$Sunday$FG$
++Bobbing further fine tuned
++Fall camera
++bobbing n fall cam not in !IsNormalView
++added sprint bobbing option
++added fall camera option
+
++Release v1.4.06
+(-) Remove v1.4.05
+
+X Re-release v1.4.06
+  -theres a bug (moon sensitive_x when bobbing)
+
+
+
+$FG,2$09/12/2022$FG$$FG$$FG$ $FG,10$Monday$FG$
++Further improved sprint bobbing and
+ camera falling
++grav check to see when is /=-1.5 suitable
+
+
+$FG,2$09/13/2022$FG$$FG$$FG$ $FG,10$Tuesday$FG$
++Tyrant Immune enemies can now Take over their surroundings at random
++Fixed BUG: corpse sometimes not displayed correctly 
+	-displayed on player pos instead of corpse pos
+
+
+$FG,2$09/14/2022$FG$$FG$$FG$ $FG,10$Wednesday$FG$
++sprint cam update
++background cam is /2
+
+$FG,2$09/16/2022$FG$$FG$$FG$ $FG,10$Friday$FG$
++tbt rarity attribute
++tbt length attribute
+
++Fade for bullet and enemies should be closer to source
++refactored condition for enemy to shoot bullet
++Fix: fall-landing isnt the same anymore after background cam is /2
++Fix: cam shake after fall-landing doesnt flow well
++Skippers: at random move instantaneously
+
+
+$FG,2$09/17/2022$FG$$FG$$FG$ $FG,10$Saturday$FG$
++enemy tbt sound effect
++crawler hitbox increased to *4
++added more game tips
++fixed Bug: combo doesnt work after hit once
++removed intentional bug: after enemy tbt, some bullets wont hit player
+
+
+
+$FG,2$09/18/2022$FG$$FG$$FG$ $FG,10$Sunday$FG$
++Blocking is made stronger
+  +block damage is bullet_dmg/4
+  +block recharge is also faster
++Refactored the allow_act to be set to false before a turn to true
++block while jumping
+  -movement is the same
+  -block damage is bullet_dmg/2
++in air blocking sprite
+
+
+$FG,2$09/30/2022$FG$$FG$$FG$ $FG,10$Friday$FG$
++Speedbreaker improves player performance (speed and jump)
+
+
+
+
+$FG,2$10/03/2022$FG$$FG$$FG$ $FG,10$Monday$FG$
++Speedbreaker cursor graphics
+
+
+
+$FG,2$10/29/2022$FG$$FG$$FG$ $FG,10$Saturday$FG$
++remove song slowdown
+
+
+$FG,2$11/03/2022$FG$$FG$$FG$ $FG,10$Thursday$FG$
++lclick = attack
++blocking 100% when timed correctly
+  -damage varries
++camera shake when run_speed=5 and in air
+
+
+$FG,2$11/05/2022$FG$ $FG,10$Saturday$FG$
++new sprites for tyrant immune enemies
++Lvl 7 is night lvl 4
++Game icon for menu in README.DD
++README.DD: Level_05 has been changed
++alter tutorial dialogue
++Add 5/11/2022 extra n performance stuff to Tips
++Release v1.4.07
+
+
+$FG,2$11/10/2022$FG$ $FG,10$Saturday$FG$
++Fix lclick may trigger Stop Speed Breaker
++Rename TBT to Time Breaker
++Fix crash for newer Zeal Version
+    *** causes crash on Zeal (over_performance_txt)
+
+
+$FG,2$11/24/2022$FG$ $FG,10$Thursday$FG$
++Fix tutorial 
+  +some parts need u to hold, use timer instead after press)
+  +Left click to attack = timer as well
+
++Accelerated 
+  +Speed on Resolutions beyond 640*480 (Zeal) is 3 (instead of 6)
+  +Slowdown time on >(640*480) is 20 (instead of 30)
+
++Release v1.4.08
+
+
+
+$FG,2$11/25/2022$FG$ $FG,10$Friday$FG$
++Bool BigResolution
+  +tbt_tyrant_max for BigResolution = 651
+  +tbt_tyrant Noise %=217
++No palette swap when gameover (lose) on Zeal (for now)
++Level_5 new msg intro
+
++Release v1.5.00
+
+
+
+$FG,2$11/29/2022$FG$ $FG,10$Tuesday$FG$
++Acceleration only after (800x600)
++Remove press esc to import/export for Zeal
+
+
+$FG,2$12/07/2022$FG$ $FG,10$Wednesday$FG$
++Easter Egg: Linkin Park - Forgotten 
+ at mainmenu (10%)
+
++Release v1.5.01
+
+
+
+
+
+
+
+-Plan 1
++InZecticide LITE (320x240)
+  (no animation, just an img)
+  (no map editors)
+
+
+-Plan (Advanced)
+  -Tutorial game song
+  -Night mode game song
+
+
+
+
+-UNIMPLEMENTED:
+  (...)
+
+  -fix: camera move too jerky when transitioning from landing to jump
+
+
+  -Updater resets score of lvl_05 if detected old version is 1.4.06 or lesser
+
+
+  -Sound effect for "Strong" landing
+
+  -Press '`' .. -> #3
+    -RClick = rapid fire (player_bullet_shot_arr[]) 
+	-sprites for them
+	  -slowed
+	  -bravery tyrant
+	  -low health
+   
+    -cannot pierce normally
+    -deals 2 damage normally to both fly and crawler
+    
+    -flicker 
+    -can pierce after >%75 rating
+    -deals 2 damage to fly
+    -deals 5 damage to crawler
+
+
+  -Meelee-only enemyies(enemies that cant shoot)
+  -cosmetics
+    -more flies sprites
+    -more crawler sprites
+    -more player sprites
+
+  -Campaign Levels (SavesStory)
+    -new tutorial + story start
+       -covers:
+  -Ground with storage (...)
+  -items class
+  -player inventory 
+
+  [][][][]   [Limbs 1]
+  [][][][]   [Limbs 2] (locked)
+  [][][][]   [Limbs 3] (locked)
+  [][][][]   [Body]
+
+
+  [Destroy]
+  [Consume]
+
+  -items class
+    -Shell [Body]
+      -damage reduction
+      -color
+
+    -Powdered Shards [Limbs]
+      -knockback
+      -damage
+      -color
+
+    -Pellet Shooters [Limbs]
+      -pellet weight F64
+      -range I64
+      -damage I64
+      -color I64
+      -knockback I64
+
+    -Wings [Body]
+     -Better Gliding
+     -Higher jump
+
+    -Limbs 2
+    -Limbs 3
+
+    -Corpse   (Increase HP)
+    -Fructose (Increase SB)
+    -Mineral  (Increase Web)
+
+
+
+-plan 3 (last):
+  -Event trigger points/ranges
+  -Gamemode 2: collect items + reach destination
+  -cosmetics
+  -water (rectangle)/triangle
+  -more backgrounds
+  -story mode
+
+
+
+-misc plans
+
+  -settings: difficulty: Normal/Hard (warning; actually hard)
+    Hard: when bullet hit, rating += zero
+  -game rating 1/2 = hearts heal +=2
+   game rating 100% = hearts heal +=3
+
+  -player classes: (...)
+    -Attack/Defense
+    -Movement
+    -Building
+  -enemies with more types of bullet shooting pattern (...)
+  -Triangles**
+    -proof = scaling
+    -
+  -update triangle fill from prof's help
+  -map_node to shrink to only be within the player's render distance (i dont know this may not be needed)
+    -allows large maps without consuming much memory
+    -Large grids still remain
+    -costs the enemy pathfinding
+    -live render distance nodes must update along with player web placement
+    -enemy pathfinding nodes must update along with live render dist nodes
+      -player web placement
+      -enemy axis < or > render dist rect
+        ‹       
+L      X   Ìÿÿÿ
+_      ’   éÿÿÿ
+[   *   ³   )   
+Q   3   h   a   
+I   0   ;   o   
+>   ,   îÿÿÿ\   
+=   !   øÿÿÿÿÿÿÿ
+B         Åÿÿÿ        X       
+3   :   Ò       
+>   D   Þ   9   
+(   7   –   Òÿÿÿ
+6   H   Ë   u   
+-   _   ¨   ©    

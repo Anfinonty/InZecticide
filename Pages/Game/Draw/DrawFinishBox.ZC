@@ -1,0 +1,15 @@
+
+U0 DrawFinishBox(CTask *,CDC *dc,F64 x1,F64 y1,F64 x2,F64 y2,Bool l)
+{
+  I64 corr_x=cam_x-PLAYER_WIDTH/2,
+      corr_y=cam_y-PLAYER_HEIGHT/2;
+  Highlight(l,LTPURPLE,BLACK,dc);  
+  GrCircle(dc,x1+corr_x,y1+corr_y,2);
+  Highlight(!l,LTPURPLE,BLACK,dc);  
+  GrCircle(dc,x2+corr_x,y2+corr_y,2);
+  dc->color=GREEN+TRANSPARENT<<16+ROPF_DITHER;;
+  GrLine(dc,x1+corr_x,y1+corr_y,x2+corr_x,y1+corr_y);
+  GrLine(dc,x1+corr_x,y2+corr_y,x2+corr_x,y2+corr_y);
+  GrLine(dc,x1+corr_x,y1+corr_y,x1+corr_x,y2+corr_y);
+  GrLine(dc,x2+corr_x,y1+corr_y,x2+corr_x,y2+corr_y);
+}
